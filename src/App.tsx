@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import MainLayout from './components/MainLayout';
 import ProcessPage from './pages/Process';
 import ParticipationPage from './pages/Participation';
+import EventDetail from './pages/EventDetail';
 
 // Placeholder
 const PlaceholderPage = ({ title }: { title: string }) => (
@@ -19,6 +20,7 @@ function App() {
           <Route index element={<PlaceholderPage title="Inicio - PMDU" />} />
           <Route path="proceso" element={<ProcessPage />} />
           <Route path="participa" element={<ParticipationPage />} />
+          <Route path="participa/:id" element={<EventDetail />} /> {/*RUTA DINÁMICA*/}
           <Route path="mapas" element={<PlaceholderPage title="Mapas y Geovisores" />} />
           <Route path="documentos" element={<PlaceholderPage title="Documentación" />} />
           <Route path="transparencia" element={<PlaceholderPage title="Transparencia" />} />

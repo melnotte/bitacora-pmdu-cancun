@@ -1,12 +1,16 @@
-import { useState, useMemo } from 'react'; // Usamos useMemo para optimizar filtros
+import { useState, useMemo } from 'react';
 import { events } from '../data/eventsData';
 import EventCard from '../components/agenda/EventCard';
 import styles from './Participation.module.css';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 
 const ITEMS_PER_PAGE = 3;
 
 const ParticipationPage = () => {
+
+  const navigate = useNavigate();
+
   // --- ESTADOS ---
   const [activeTab, setActiveTab] = useState<'proximos' | 'pasados'>('proximos');
   const [currentPage, setCurrentPage] = useState(1);
@@ -66,6 +70,10 @@ const ParticipationPage = () => {
   const handleTabChange = (tab: 'proximos' | 'pasados') => {
     setActiveTab(tab);
     setCurrentPage(1);
+  };
+
+  const handleEventClick = (id: string) => {
+    navigate(`/participa/${id}`); 
   };
 
   return (
@@ -170,7 +178,7 @@ const ParticipationPage = () => {
             <EventCard 
               key={event.id} 
               event={event} 
-              onClick={(id) => alert(`Ir a detalle de: ${id}`)} 
+              onClick={handleEventClick}
             />
           ))
         ) : (

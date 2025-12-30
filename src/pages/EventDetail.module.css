@@ -1,0 +1,38 @@
+.pageContainer { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+.backLink {
+  display: inline-flex; align-items: center; gap: 8px;
+  color: #666; text-decoration: none; margin-bottom: 20px; font-weight: 500;
+}
+.backLink:hover { color: #005eb8; }
+
+.header { margin-bottom: 30px; border-bottom: 1px solid #eee; padding-bottom: 20px; }
+.statusBadge {
+  display: inline-block; padding: 6px 12px; border-radius: 20px;
+  font-size: 0.85rem; font-weight: bold; text-transform: uppercase; margin-bottom: 10px;
+}
+.abierto { background: #e8f5e9; color: #2e7d32; }
+.lleno { background: #ffebee; color: #c62828; }
+.finalizado { background: #eee; color: #666; }
+
+.title { font-size: 2.2rem; color: #333; margin: 10px 0; }
+.metaGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 20px; }
+.metaItem { display: flex; align-items: center; gap: 10px; color: #555; }
+.metaIcon { color: #005eb8; font-size: 1.2rem; }
+
+.section { margin-bottom: 40px; }
+.sectionTitle { font-size: 1.4rem; color: #333; margin-bottom: 15px; border-left: 4px solid #005eb8; padding-left: 10px; }
+
+/* Agenda List */
+.agendaList { list-style: none; padding: 0; }
+.agendaItem { padding: 10px 0; border-bottom: 1px dashed #eee; display: flex; gap: 15px; }
+.agendaTime { font-weight: bold; color: #005eb8; min-width: 80px; }
+
+/* Evidencias */
+.evidenceGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; }
+.evidenceCard {
+  background: #fdfdfd; border: 1px solid #ddd; padding: 20px; border-radius: 8px;
+  text-align: center; text-decoration: none; color: #555; transition: all 0.2s;
+}
+.evidenceCard:hover { border-color: #005eb8; color: #005eb8; transform: translateY(-3px); }
+.evidenceIcon { font-size: 2rem; margin-bottom: 10px; display: block; }
