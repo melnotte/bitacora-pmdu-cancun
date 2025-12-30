@@ -27,7 +27,7 @@ export const events: Event[] = [
     title: "Taller de Diagnóstico Zona Norte",
     date: "2025-10-15",
     time: "10:00 AM - 2:00 PM",
-    location: "Domo Deportivo SM 23",
+    location: "Domo Deportivo 237",
     district: "Zona Norte",
     modality: "Presencial",
     category: "Taller",

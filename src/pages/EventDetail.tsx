@@ -2,7 +2,22 @@ import { useParams, Link } from 'react-router-dom';
 import { events } from '../data/eventsData';
 import EventRegistration from '../components/agenda/EventRegistration';
 import styles from './EventDetail.module.css';
-import { FaArrowLeft, FaCalendarAlt, FaMapMarkerAlt, FaUsers, FaFilePdf, FaVideo, FaImages } from 'react-icons/fa';
+import { 
+  FaArrowLeft, 
+  FaCalendarAlt, 
+  FaMapMarkerAlt, 
+  FaUsers, 
+  FaFilePdf, 
+  FaVideo, 
+  FaImages,
+  FaCalendarPlus,
+  FaApple,
+  FaFacebook,
+  FaLink
+} from 'react-icons/fa';
+import { FaXTwitter, FaWhatsapp } from 'react-icons/fa6';
+
+
 
 const EventDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -13,6 +28,70 @@ const EventDetail = () => {
   }
 
   const isPast = event.status === 'finalizado';
+
+  // 1. MÉTODO PARA GOOGLE CALENDAR (Enlace directo)
+  const handleGoogleCalendar = () => {
+    const startDate = event.date.replace(/-/g, '') + 'T090000';
+    const endDate = event.date.replace(/-/g, '') + 'T180000';
+    
+    const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&details=${encodeURIComponent(event.description)}&location=${encodeURIComponent(event.location)}&dates=${startDate}/${endDate}`;
+    
+    window.open(googleUrl, '_blank');
+  };
+
+  // 2. MÉTODO iCAL (Descargable Universal)
+  const handleICalDownload = () => {
+    const now = new Date(); 
+    const icsContent = `BEGIN:VCALENDAR
+      VERSION:2.0
+      PRODID:-//PMDU Cancun//Eventos//ES
+      BEGIN:VEVENT
+      UID:${event.id}@pmducancun.gob.mx
+      DTSTAMP:${now.toISOString().replace(/[-:]/g, '').split('.')[0]}Z
+      DTSTART:${event.date.replace(/-/g, '')}T090000
+      DTEND:${event.date.replace(/-/g, '')}T180000
+      SUMMARY:${event.title}
+      DESCRIPTION:${event.description}
+      LOCATION:${event.location}
+      END:VEVENT
+      END:VCALENDAR`;
+
+    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `${event.title}.ics`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // --- FUNCIONALIDAD: COMPARTIR ---
+  const currentUrl = window.location.href;
+  const shareText = `¡Participa en el evento: ${event.title}!`;
+
+  const shareOnWhatsApp = () => {
+    // API de WhatsApp Web/Mobile
+    const url = `https://wa.me/?text=${encodeURIComponent(shareText + ' ' + currentUrl)}`;
+    window.open(url, '_blank');
+  };
+
+  const shareOnFacebook = () => {
+    // API de compartir de Facebook
+    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}`;
+    window.open(url, '_blank');
+  };
+
+  const shareOnX = () => {
+    // API de compartir de X
+    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(currentUrl)}`;
+    window.open(url, '_blank');
+  };
+
+  const copyLink = () => {
+    navigator.clipboard.writeText(currentUrl);
+    alert('Enlace copiado al portapapeles. ¡Listo para compartir!');
+  };
 
   return (
     <div className={styles.pageContainer}>
@@ -50,6 +129,58 @@ const EventDetail = () => {
               {event.organizers?.join(', ') || 'Comité PMDU'}
             </div>
           </div>
+        </div>
+
+        {/* BOTONES DE ACCIÓN */}
+        <div className={styles.actionButtons}>
+          
+          {/* Grupo Calendario */}
+          <button onClick={handleGoogleCalendar} className={styles.iconButton} title="Agregar a Google Calendar">
+            <FaCalendarPlus style={{ color: '#4285F4' }} /> Agregar a Calendar
+          </button>
+          
+          <button onClick={handleICalDownload} className={styles.iconButton} title="Descargar para Outlook/Apple">
+             <FaApple /> Apple/Outlook (.ics)
+          </button>
+
+          {/* Divisor Visual */}
+          <div style={{ width: '1px', background: '#ddd', margin: '0 10px' }}></div>
+
+          <span style={{ fontSize: '0.9rem', color: '#666', fontWeight: 500, alignSelf: 'center' }}>
+            Compartir en:
+          </span>
+
+          {/* Grupo Redes Sociales */}
+          <button 
+            onClick={shareOnWhatsApp} 
+            className={styles.iconButton} 
+            style={{ color: '#25D366', borderColor: '#25D366' }}
+            title="Compartir en WhatsApp"
+          >
+            <FaWhatsapp size={20} />
+          </button>
+
+          <button 
+            onClick={shareOnFacebook} 
+            className={styles.iconButton} 
+            style={{ color: '#1877F2', borderColor: '#1877F2' }}
+            title="Compartir en Facebook"
+          >
+            <FaFacebook size={20} />
+          </button>
+
+          <button 
+            onClick={shareOnX} 
+            className={styles.iconButton} 
+            style={{ color: '#000000', borderColor: '#000000' }}
+            title="Compartir en X (Twitter)"
+          >
+            <FaXTwitter size={20} />
+          </button>
+
+          <button onClick={copyLink} className={styles.iconButton} title="Copiar enlace">
+            <FaLink size={18} />
+          </button>
         </div>
       </header>
 
@@ -113,6 +244,22 @@ const EventDetail = () => {
                 Galería de Fotos
               </a>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* SECCIÓN DE MAPA (Solo si es presencial) */}
+      {event.modality === 'Presencial' && (
+        <div className={styles.section} style={{ marginTop: '50px' }}>
+          <h3 className={styles.sectionTitle}>Ubicación</h3>
+          <p style={{marginBottom: '10px'}}>Cómo llegar a: <strong>{event.location}</strong></p>
+          <div className={styles.mapContainer}>
+            <iframe 
+              className={styles.mapFrame}
+              title="Mapa de Ubicación"
+              src={`https://maps.google.com/maps?q=${encodeURIComponent(event.location + ', Cancún, Quintana Roo')}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
+              loading="lazy"
+            ></iframe>
           </div>
         </div>
       )}
