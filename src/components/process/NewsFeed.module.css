@@ -1,0 +1,102 @@
+.feedContainer {
+  margin-top: 2rem;
+}
+
+.heading {
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+/* Controles */
+.controls {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.searchBox, .filterBox {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 0 10px;
+}
+
+.searchBox { flex: 2; }
+.filterBox { flex: 1; }
+
+.searchInput, .selectInput {
+  border: none;
+  padding: 10px;
+  width: 100%;
+  outline: none;
+  font-size: 1rem;
+  background: transparent;
+}
+
+.searchIcon, .filterIcon {
+  color: #888;
+}
+
+/* Grid de Noticias */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.cardDate {
+  font-size: 0.8rem;
+  color: #888;
+}
+
+.cardTitle {
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.cardContent {
+  font-size: 0.95rem;
+  color: #666;
+  line-height: 1.5;
+}
+
+/* Badges por categoría */
+.badge {
+  font-size: 0.75rem;
+  padding: 4px 8px;
+  border-radius: 12px;
+  text-transform: uppercase;
+  font-weight: bold;
+  background: #eee;
+  color: #555;
+}
+
+/* Colores específicos para categorías */
+.Taller { background-color: #e3f2fd; color: #1565c0; }
+.Avance { background-color: #e8f5e9; color: #2e7d32; }
+.Comunicado { background-color: #fff3e0; color: #ef6c00; }
+.Hito { background-color: #f3e5f5; color: #7b1fa2; }

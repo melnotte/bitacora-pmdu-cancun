@@ -1,0 +1,41 @@
+.bannerContainer {
+  background-color: #005eb8;
+  color: white;
+  padding: 10px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.content {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.label {
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  opacity: 0.9;
+}
+
+.ctaButton {
+  background-color: white;
+  color: #005eb8;
+  padding: 5px 15px;
+  border-radius: 20px;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 0.85rem;
+  transition: transform 0.2s;
+}
+
+.ctaButton:hover {
+  transform: scale(1.05);
+}
