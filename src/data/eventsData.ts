@@ -69,7 +69,7 @@ export const events: Event[] = [
     title: "Mesa de Trabajo: Zona Hotelera",
     date: "2025-11-05",
     time: "09:00 AM",
-    location: "Centro de Convenciones",
+    location: "Cancun Center",
     district: "Zona Hotelera",
     modality: "Presencial",
     category: "Mesa de Trabajo",
