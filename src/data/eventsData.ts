@@ -8,18 +8,22 @@ export interface EventEvidence {
 export interface Event {
   id: string;
   title: string;
-  date: string; // Formato YYYY-MM-DD
+  date: string;
   time: string;
-  location: string;
+  location: string;  // front
+  lat?: number;      // coordenadas
+  lng?: number;
+  mapQuery?: string; // dirección en google
   district: string;
   modality: 'Presencial' | 'Virtual' | 'Híbrido';
   category: 'Taller' | 'Conferencia' | 'Mesa de Trabajo' | 'Audiencia';
-  status: 'abierto' | 'lleno' | 'finalizado'; 
+  status: 'abierto' | 'lleno' | 'finalizado';
   description: string;
   agenda?: string[];
   organizers?: string[];
   evidence?: EventEvidence;
 }
+
 
 export const events: Event[] = [
   {
@@ -28,6 +32,8 @@ export const events: Event[] = [
     date: "2025-10-15",
     time: "10:00 AM - 2:00 PM",
     location: "Domo Deportivo 237",
+    lat: 21.202433790565664,
+    lng: -86.8329215275856,
     district: "Zona Norte",
     modality: "Presencial",
     category: "Taller",
@@ -54,6 +60,7 @@ export const events: Event[] = [
     date: "2024-01-15",
     time: "12:00 PM",
     location: "Salón Presidentes",
+    mapQuery: "Blvd. Kukulcan Km 7.5, Punta Cancun, Zona Hotelera, 77500 Cancún, Q.R.",
     district: "Centro",
     modality: "Presencial",
     category: "Audiencia",
@@ -70,6 +77,7 @@ export const events: Event[] = [
     date: "2025-11-05",
     time: "09:00 AM",
     location: "Cancun Center",
+    mapQuery: "Cancun Center, Blvd. Kukulcán Km 9, Zona Hotelera, Cancún, Q.R.",
     district: "Zona Hotelera",
     modality: "Presencial",
     category: "Mesa de Trabajo",

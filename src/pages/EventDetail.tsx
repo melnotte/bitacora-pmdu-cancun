@@ -29,6 +29,10 @@ const EventDetail = () => {
 
   const isPast = event.status === 'finalizado';
 
+  const mapSrc = event.lat && event.lng
+  ? `https://maps.google.com/maps?q=${event.lat},${event.lng}&z=17&output=embed`
+  : `https://maps.google.com/maps?q=${encodeURIComponent(event.mapQuery || event.location)}&z=15&output=embed`;
+
   // 1. MÉTODO PARA GOOGLE CALENDAR (Enlace directo)
   const handleGoogleCalendar = () => {
     const startDate = event.date.replace(/-/g, '') + 'T090000';
@@ -249,20 +253,24 @@ const EventDetail = () => {
       )}
 
       {/* SECCIÓN DE MAPA (Solo si es presencial) */}
-      {event.modality === 'Presencial' && (
+      {event.modality === 'Presencial' && mapSrc && (
         <div className={styles.section} style={{ marginTop: '50px' }}>
-          <h3 className={styles.sectionTitle}>Ubicación</h3>
-          <p style={{marginBottom: '10px'}}>Cómo llegar a: <strong>{event.location}</strong></p>
-          <div className={styles.mapContainer}>
-            <iframe 
-              className={styles.mapFrame}
-              title="Mapa de Ubicación"
-              src={`https://maps.google.com/maps?q=${encodeURIComponent(event.location + ', Cancún, Quintana Roo')}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
-              loading="lazy"
-            ></iframe>
-          </div>
+        <h3 className={styles.sectionTitle}>Ubicación</h3>
+        <p>
+          Cómo llegar a: <strong>{event.location}</strong>
+        </p>
+
+        <div className={styles.mapContainer}>
+          <iframe
+            className={styles.mapFrame}
+            title="Mapa de Ubicación"
+            src={mapSrc}
+            loading="lazy"
+          />
         </div>
-      )}
+      </div>
+    )}
+
 
       {/* Caso 3: Evento Lleno */}
       {event.status === 'lleno' && (
