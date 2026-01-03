@@ -1,0 +1,167 @@
+.container {
+  padding: 0;
+  width: 100%;
+}
+
+/* --- Grid de Tarjetas (Estatus) --- */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.statCard {
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  border-left-width: 5px;
+  background-color: #ffffff;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center; 
+  text-align: center;
+  transition: transform 0.2s;
+}
+
+.statCard:hover {
+  transform: translateY(-2px);
+}
+
+.statLabel {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #6b7280;
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.05em;
+}
+
+.statValue {
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: #1f2937;
+}
+
+/* --- Contenedor de Gráficas --- */
+.chartsContainer {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+
+@media (min-width: 1024px) {
+  .chartsContainer {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.chartSection {
+  background-color: #ffffff;
+  padding: 2rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 1rem;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.chartTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  color: #111827;
+  border-bottom: 2px solid #f3f4f6;
+  padding-bottom: 1rem;
+  text-align: center;
+}
+
+/* --- Gráfica Vertical (Semanas) --- */
+.weeklyChart {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  height: 220px;
+  padding-top: 1rem;
+  width: 100%;
+}
+
+.weekColumn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  flex: 1;
+  height: 100%;
+  margin: 0 4px;
+}
+
+.barVertical {
+  width: 100%;
+  max-width: 40px;
+  background-color: #3B82F6;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+  transition: all 0.3s ease;
+  min-height: 6px;
+  position: relative;
+}
+
+.barVertical:hover {
+  background-color: #2563EB;
+  transform: scaleY(1.05);
+}
+
+.barTooltip {
+  position: absolute;
+  top: -35px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1f2937;
+  color: white;
+  font-size: 0.75rem;
+  padding: 4px 8px;
+  border-radius: 4px;
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+  font-weight: bold;
+  white-space: nowrap;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  z-index: 20;
+}
+
+.barVertical:hover .barTooltip {
+  opacity: 1;
+}
+
+.weekLabel {
+  margin-top: 1rem;
+  font-size: 0.75rem;
+  color: #6b7280;
+  text-align: center;
+  font-weight: 600;
+}
+
+/* --- Gráfica Horizontal (Temas) --- */
+.topicRow {
+  margin-bottom: 1.5rem;
+}
+.topicHeader {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  color: #4b5563;
+  font-weight: 500;
+}
+.progressContainer {
+  width: 100%;
+  background-color: #f3f4f6;
+  border-radius: 9999px;
+  height: 0.85rem;
+  overflow: hidden;
+}
+.progressBar {
+  height: 100%;
+  border-radius: 9999px;
+}

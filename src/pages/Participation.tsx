@@ -4,6 +4,7 @@ import EventCard from '../components/agenda/EventCard';
 import styles from './Participation.module.css';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import PageHeader from '../components/layout/PageHeader';
 
 const ITEMS_PER_PAGE = 3;
 
@@ -78,10 +79,10 @@ const ParticipationPage = () => {
 
   return (
     <div className={styles.container}>
-      <header className={styles.header}>
-        <h1 className={styles.title}>Participación Ciudadana</h1>
-        <p className={styles.subtitle}>Encuentra talleres, foros y audiencias por zona o tema.</p>
-      </header>
+      <PageHeader 
+        title="Participación Ciudadana" 
+        description="Encuentra talleres, foros y audiencias por zona o tema." 
+      />
 
       {/* Tabs */}
       <div className={styles.tabs}>

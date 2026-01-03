@@ -3,6 +3,7 @@ import MainLayout from './components/MainLayout';
 import ProcessPage from './pages/Process';
 import ParticipationPage from './pages/Participation';
 import EventDetail from './pages/EventDetail';
+import Transparency from './pages/Transparency';
 
 // Placeholder
 const PlaceholderPage = ({ title }: { title: string }) => (
@@ -23,7 +24,7 @@ function App() {
           <Route path="participa/:id" element={<EventDetail />} /> {/*RUTA DINÁMICA*/}
           <Route path="mapas" element={<PlaceholderPage title="Mapas y Geovisores" />} />
           <Route path="documentos" element={<PlaceholderPage title="Documentación" />} />
-          <Route path="transparencia" element={<PlaceholderPage title="Transparencia" />} />
+          <Route path="transparencia" element={<Transparency />} />
           <Route path="contacto" element={<PlaceholderPage title="Contacto" />} />
         </Route>
       </Routes>

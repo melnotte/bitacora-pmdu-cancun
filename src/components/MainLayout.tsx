@@ -5,13 +5,16 @@ import { Outlet } from 'react-router-dom';
 
 const MainLayout = () => {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+    // Reemplaza styles por clases de Tailwind
+    <div className="flex flex-col min-h-screen">
       <PhaseBanner />
       <Navbar />
-      {/* Outlet renderiza la página hija seleccionada por el Router */}
-      <main style={{ flex: 1 }}> 
+      
+      {/* Hace que el main ocupe todo el espacio disponible empujando al footer abajo */}
+      <main className="flex-1"> 
         <Outlet />
       </main>
+      
       <Footer />
     </div>
   );
