@@ -71,7 +71,7 @@ const EventDetail = () => {
   };
 
   // --- FUNCIONALIDAD: COMPARTIR ---
-  const currentUrl = window.location.href;
+  const currentUrl = `${window.location.origin}/participa/${event.id}`;
   const shareText = `¡Participa en el evento: ${event.title}!`;
 
   const shareOnWhatsApp = () => {

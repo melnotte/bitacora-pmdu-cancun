@@ -8,7 +8,7 @@ export interface EventEvidence {
 export interface Event {
   id: string;
   title: string;
-  date: string;
+  date: string;      // Formato YYYY-MM-DD
   time: string;
   location: string;  // front
   lat?: number;      // coordenadas
