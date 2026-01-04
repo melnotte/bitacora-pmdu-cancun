@@ -1,5 +1,6 @@
 import styles from './Footer.module.css';
-import { FaFacebook, FaTwitter, FaInstagram } from 'react-icons/fa';
+import { FaFacebook, FaInstagram } from 'react-icons/fa';
+import { FaXTwitter } from 'react-icons/fa6';
 
 const Footer = () => {
   return (
@@ -9,7 +10,7 @@ const Footer = () => {
           <h3>PMDU Cancún</h3>
           <p>Programa Municipal de Desarrollo Urbano</p>
           <div className={styles.socials}>
-            <FaFacebook /> <FaTwitter /> <FaInstagram />
+            <FaFacebook /> <FaXTwitter /> <FaInstagram />
           </div>
         </div>
         
