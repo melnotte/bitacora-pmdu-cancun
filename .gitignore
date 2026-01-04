@@ -28,3 +28,6 @@ dist-ssr
 .env.local
 .env.*
 !.env.example
+
+// Historias de Usuario
+requisitos.txt

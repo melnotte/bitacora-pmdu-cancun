@@ -1,0 +1,127 @@
+/* --- Estilos del Hero --- */
+.hero {
+  text-align: center;
+  padding: 120px 20px 100px;
+  
+  /* Capa blanca sobre la imagen */
+  background-image: linear-gradient(rgba(255, 255, 255, 0.60), rgba(255, 255, 255, 0.85)), url('../assets/hero.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  
+  border-bottom: 1px solid #e2e8f0;
+  color: #1e293b; 
+}
+
+.heroContent {
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.heroTitle {
+  font-size: 3.5rem;
+  color: #0f172a; 
+  margin-bottom: 20px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  text-shadow: none; 
+}
+
+.highlight {
+  color: #005eb8; 
+}
+
+.heroSubtitle {
+  font-size: 1.25rem;
+  color: #475569; 
+  max-width: 650px;
+  margin: 0 auto 35px auto;
+  line-height: 1.6;
+  font-weight: 500;
+}
+
+/* Letra animada */
+.changingLetter {
+  display: inline-block;
+  min-width: 12px;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.fadeOut { opacity: 0; }
+.fadeIn { opacity: 1; }
+
+/* Botón "Ir a la consulta" */
+.ctaButton {
+  background-color: transparent;
+  color: #005eb8;
+  border: 2px solid #005eb8;
+  padding: 12px 30px;
+  border-radius: 50px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.ctaButton:hover {
+  background-color: #005eb8;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 94, 184, 0.2);
+}
+
+/* --- Banner de Consulta --- */
+.consultationBanner {
+  background-color: #005eb8;
+  background-image: linear-gradient(135deg, #005eb8 0%, #003875 100%);
+  padding: 100px 20px;
+  color: white;
+  text-align: center;
+}
+
+.bannerContent {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.bannerTitle {
+  font-size: 2.8rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.bannerText {
+  font-size: 1.25rem;
+  opacity: 0.95;
+  line-height: 1.6;
+  margin-bottom: 40px;
+}
+
+.primaryButton {
+  display: inline-block;
+  background-color: #ffffff;
+  color: #005eb8;
+  font-size: 1.2rem;
+  font-weight: 700;
+  padding: 18px 40px;
+  border-radius: 50px;
+  text-decoration: none;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.primaryButton:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
+  background-color: #f9fafb;
+}
+
+@media (max-width: 768px) {
+  .heroTitle { font-size: 2.5rem; }
+  .bannerTitle { font-size: 2rem; }
+  .primaryButton { width: 100%; text-align: center; }
+  .hero { padding: 80px 20px; }
+}

@@ -1,8 +1,9 @@
+import { Link } from 'react-router-dom';
 import { processStatus } from '../../config/siteConfig';
 import styles from './PhaseBanner.module.css';
-import { Link } from 'react-router-dom';
 
 const PhaseBanner = () => {
+  // Si la fase no está activa según la config, no renderizamos nada
   if (!processStatus.isActive) return null;
 
   return (
@@ -12,7 +13,9 @@ const PhaseBanner = () => {
         <strong className={styles.phaseName}>{processStatus.currentPhase}</strong>
         <span className={styles.dates}>({processStatus.dateRange})</span>
       </div>
-      <Link to={processStatus.ctaLink} className={styles.ctaButton}>
+      
+      {/* Enlace a la página de Consulta */}
+      <Link to="/consulta" className={styles.ctaButton}>
         {processStatus.ctaText}
       </Link>
     </div>

@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import MainLayout from './components/MainLayout';
+import Home from './pages/Home';
+import Consultation from './pages/Consultation';
 import ProcessPage from './pages/Process';
 import ParticipationPage from './pages/Participation';
 import EventDetail from './pages/EventDetail';
@@ -18,7 +20,8 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<MainLayout />}>
-          <Route index element={<PlaceholderPage title="Inicio - PMDU" />} />
+          <Route index element={<Home />} />
+          <Route path="consulta" element={<Consultation />} />
           <Route path="proceso" element={<ProcessPage />} />
           <Route path="participa" element={<ParticipationPage />} />
           <Route path="participa/:id" element={<EventDetail />} /> {/*RUTA DINÁMICA*/}
