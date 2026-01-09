@@ -5,7 +5,7 @@ import PageHeader from '../components/layout/PageHeader';
 
 const ProcessPage = () => {
   return (
-    <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '40px 20px' }}>
+    <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '0 20px 40px 20px' }}>
 
       <PageHeader 
         title="Proceso de Elaboración" 

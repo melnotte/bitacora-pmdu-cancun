@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { FaCheckCircle, FaCloudUploadAlt } from 'react-icons/fa';
 import styles from './CommentForm.module.css';
+import type { Comment } from '../../data/commentsData';
 
-// Catálogo de temas
 const THEMES = [
   "Diagnóstico Integrado",
   "Estrategia de Movilidad",
@@ -47,14 +47,40 @@ const CommentForm = () => {
     e.preventDefault();
     setStatus('submitting');
 
-    // Simulación de envío al backend
+    // 1. Simulación de retardo de red
     setTimeout(() => {
-      // Generar folio: PMDU-AÑO-RANDOM
-      const newFolio = `CONSULTA-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+      // 2. Generar datos del sistema (Folio, ID, Fecha)
+      const year = new Date().getFullYear();
+      const randomId = Math.floor(1000 + Math.random() * 9000);
+      const newFolio = `PMDU-${year}-${randomId}`;
+      const today = new Date().toISOString().split('T')[0]; // Formato YYYY-MM-DD
+
+      // 3. Crear el objeto con la estructura
+      const newComment: Comment = {
+        id: crypto.randomUUID(),
+        folio: newFolio,
+        date: today,
+        topic: formData.topic,
+        zone: formData.zone || 'No especificada',
+        content: formData.comment,
+        status: 'Recibido',
+        internalNote: ''
+      };
+
+      // 4. Guardar en localStorage para simular persistencia en la demo
+      try {
+        const existingData = localStorage.getItem('pmdu_demo_comments');
+        const comments = existingData ? JSON.parse(existingData) : [];
+        localStorage.setItem('pmdu_demo_comments', JSON.stringify([newComment, ...comments]));
+      } catch (error) {
+        console.error("Error guardando en localstorage", error);
+      }
+
+      console.log("✅ Comentario registrado en sistema:", newComment);
+      if (file) console.log("📎 Archivo adjunto:", file.name);
+
       setFolio(newFolio);
       setStatus('success');
-      
-      console.log("Enviando datos:", { ...formData, file, date: new Date().toISOString() });
     }, 1500);
   };
 
@@ -69,24 +95,24 @@ const CommentForm = () => {
     return (
       <div className={styles.container}>
         <div className={styles.successState}>
-          <FaCheckCircle className={styles.successIcon} />
+          <FaCheckCircle color="#2e7d32" size={60} style={{ marginBottom: '20px' }} />
           <h2 className={styles.title}>¡Comentario Enviado!</h2>
           <p className={styles.subtitle}>
             Tu aportación ha sido registrada correctamente en el sistema de consulta pública.
           </p>
 
-          <div className={styles.folioBox}>
-            <span className={styles.folioLabel}>Tu folio de seguimiento</span>
-            <span className={styles.folioValue}>{folio}</span>
+          <div style={{ background: '#f5f5f5', padding: '15px', borderRadius: '8px', margin: '20px 0', border: '1px dashed #ccc' }}>
+            <span style={{ display: 'block', fontSize: '0.85rem', color: '#666', marginBottom: '5px' }}>Tu folio de seguimiento</span>
+            <span style={{ fontSize: '1.5rem', fontWeight: '800', color: '#005eb8', letterSpacing: '1px' }}>{folio}</span>
           </div>
 
-          <p style={{ color: '#666', marginBottom: '20px' }}>
+          <p style={{ color: '#666', marginBottom: '30px', fontSize: '0.9rem' }}>
             {formData.email 
-              ? `Hemos enviado un comprobante a ${formData.email}.`
-              : "Guarda este folio para futuras referencias."}
+              ? `Hemos enviado un comprobante digital a ${formData.email}.`
+              : "Por favor guarda este folio para consultar el estatus de tu aportación en la sección de Transparencia."}
           </p>
 
-          <button onClick={handleReset} className={styles.resetButton}>
+          <button onClick={handleReset} className={styles.submitButton} style={{ marginTop: 0 }}>
             Enviar otro comentario
           </button>
         </div>
@@ -114,7 +140,8 @@ const CommentForm = () => {
                 name="topic" 
                 value={formData.topic} 
                 onChange={handleChange} 
-                className={styles.select} 
+                className={styles.select}
+                style={{ width: '100%', padding: '12px', borderRadius: '6px', border: '1px solid #ccc' }}
                 required
               >
                 <option value="">Selecciona un tema...</option>
@@ -146,7 +173,8 @@ const CommentForm = () => {
             value={formData.comment} 
             onChange={handleChange} 
             placeholder="Describe tu observación de manera clara..."
-            className={styles.textarea} 
+            className={styles.textarea}
+            style={{ minHeight: '120px', width: '100%', padding: '12px', borderRadius: '6px', border: '1px solid #ccc', resize: 'vertical' }}
             required
           />
         </div>
@@ -154,16 +182,38 @@ const CommentForm = () => {
         {/* Archivo Adjunto */}
         <div className={styles.formGroup}>
           <label className={styles.label}>Adjuntar Documento o Evidencia (Opcional)</label>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <input 
-              type="file" 
-              onChange={handleFileChange} 
-              className={styles.fileInput} 
-              accept=".pdf,.doc,.docx,.jpg,.png"
-            />
-            {file && <span style={{ fontSize: '0.8rem', color: '#2e7d32' }}><FaCloudUploadAlt /> Listo para subir</span>}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '5px' }}>
+            <label style={{ 
+              cursor: 'pointer', 
+              padding: '8px 16px', 
+              border: '1px solid #ddd', 
+              borderRadius: '6px', 
+              background: '#f9f9f9', 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '8px',
+              fontSize: '0.9rem'
+            }}>
+              <FaCloudUploadAlt color="#666" />
+              Elegir archivo
+              <input 
+                type="file" 
+                onChange={handleFileChange} 
+                style={{ display: 'none' }}
+                accept=".pdf,.doc,.docx,.jpg,.png"
+              />
+            </label>
+            {file ? (
+              <span style={{ fontSize: '0.85rem', color: '#2e7d32', fontWeight: 600 }}>
+                {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
+              </span>
+            ) : (
+              <span style={{ fontSize: '0.85rem', color: '#999' }}>Ningún archivo seleccionado</span>
+            )}
           </div>
-          <small style={{ color: '#9ca3af' }}>Formatos: PDF, Word, Imagen. Máx 5MB.</small>
+          <small style={{ color: '#9ca3af', display: 'block', marginTop: '5px', fontSize: '0.8rem' }}>
+            Formatos aceptados: PDF, Word, Imagen. Tamaño máx: 5MB.
+          </small>
         </div>
 
         {/* Correo Electrónico */}
@@ -180,7 +230,7 @@ const CommentForm = () => {
         </div>
 
         {/* Aviso de Privacidad */}
-        <div className={styles.checkboxGroup}>
+        <div className={styles.checkboxGroup} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', marginTop: '10px' }}>
           <input 
             type="checkbox" 
             name="privacy" 
@@ -188,9 +238,10 @@ const CommentForm = () => {
             checked={formData.privacy} 
             onChange={handleChange} 
             className={styles.checkbox}
+            style={{ marginTop: '4px' }}
             required 
           />
-          <label htmlFor="privacy" className={styles.checkboxLabel}>
+          <label htmlFor="privacy" className={styles.checkboxLabel} style={{ fontSize: '0.9rem', color: '#555', lineHeight: '1.4' }}>
             He leído y acepto el <strong>Aviso de Privacidad</strong>. Mis datos personales (si los proporciono) 
             serán utilizados únicamente para el registro y análisis estadístico de la consulta pública.
           </label>
@@ -209,4 +260,4 @@ const CommentForm = () => {
   );
 };
 
-export default CommentForm; 
+export default CommentForm;

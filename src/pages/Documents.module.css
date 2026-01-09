@@ -1,0 +1,165 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px 40px 20px;
+}
+
+/* --- TABS --- */
+.tabsContainer {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 30px;
+  border-bottom: 2px solid #eee;
+}
+
+.tab {
+  padding: 15px 30px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #888;
+  cursor: pointer;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.3s;
+}
+
+.tab:hover {
+  color: #005eb8;
+}
+
+/* Clase para el tab activo */
+.activeTab {
+  color: #005eb8;
+  border-bottom-color: #005eb8;
+}
+
+/* --- LAYOUT PRINCIPAL --- */
+.layout {
+  display: grid;
+  grid-template-columns: 250px 1fr;
+  gap: 40px;
+  margin-top: 30px;
+}
+
+/* Sidebar de Filtros */
+.filters {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  height: fit-content;
+  position: sticky;
+  top: 20px;
+}
+
+.filterGroup {
+  margin-bottom: 25px;
+}
+
+.filterTitle {
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: #555;
+  display: block;
+}
+
+.filterOption {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: #555;
+  transition: color 0.2s;
+}
+
+.filterOption:hover {
+  color: #005eb8;
+}
+
+.checkbox {
+  margin-right: 10px;
+  accent-color: #005eb8;
+}
+
+.clearBtn {
+  background: none;
+  border: none;
+  color: #666;
+  font-size: 0.85rem;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px; 
+}
+
+.clearBtn:hover {
+  color: #005eb8;
+}
+
+/* Grid de Resultados */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+/* Paginación */
+.pagination {
+  margin-top: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+}
+
+.pageBtn {
+  padding: 8px 16px;
+  border: 1px solid #ddd;
+  background: #fff;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.pageBtn:hover:not(:disabled) {
+  border-color: #005eb8;
+  color: #005eb8;
+}
+
+.pageBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pageInfo {
+  font-weight: 500;
+  color: #333;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+  
+  .filters {
+    position: static;
+    margin-bottom: 30px;
+  }
+
+  .tabsContainer {
+    overflow-x: auto;
+    justify-content: flex-start;
+  }
+  
+  .tab {
+    white-space: nowrap;
+  }
+}

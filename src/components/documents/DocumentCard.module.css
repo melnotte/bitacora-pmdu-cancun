@@ -1,0 +1,142 @@
+.card {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: box-shadow 0.2s;
+  height: 100%;
+}
+
+.card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  border-color: #ccc;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.typeBadge {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background-color: #f5f5f5;
+  color: #555;
+}
+
+/* --- COLORES POR TIPO DE DOCUMENTO --- */
+.typeBadge[data-type="Mapa"] { 
+  background-color: #e3f2fd; 
+  color: #1565c0; 
+}
+.typeBadge[data-type="Programa"] { 
+  background-color: #e8f5e9; 
+  color: #2e7d32; 
+}
+.typeBadge[data-type="Anexo"] { 
+  background-color: #f3f4f6; 
+  color: #374151; 
+}
+.typeBadge[data-type="Acta"] { 
+  background-color: #f3e5f5; 
+  color: #7b1fa2; 
+}
+.typeBadge[data-type="Convocatoria"] { 
+  background-color: #fff3e0; 
+  color: #e65100; 
+}
+.typeBadge[data-type="Dictamen"] { 
+  background-color: #e0f2f1; 
+  color: #00695c; 
+}
+
+
+.title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 8px 0;
+  line-height: 1.4;
+}
+
+.meta {
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 12px;
+  display: flex;
+  gap: 15px;
+}
+
+.description {
+  font-size: 0.9rem;
+  color: #555;
+  margin-bottom: 20px;
+  flex-grow: 1; 
+}
+
+/* --- BOTONES --- */
+.actions {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.viewBtn {
+  background-color: #005eb8;
+  color: white;
+  border: 1px solid #005eb8;
+}
+
+.viewBtn:hover {
+  background-color: #004487;
+  border-color: #004487;
+}
+
+.downloadBtn {
+  background-color: #f0f2f5;
+  color: #333;
+  border: 1px solid #ddd;
+}
+
+.downloadBtn:hover {
+  background-color: #e4e6e9;
+  border-color: #ccc;
+  color: #000;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tag {
+  font-size: 0.75rem;
+  color: #888;
+  background: #f9f9f9;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
