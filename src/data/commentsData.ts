@@ -3,7 +3,7 @@ export type CommentStatus = 'Recibido' | 'En análisis' | 'Atendido/Integrado' |
 export interface Comment {
   id: string;
   folio: string;
-  date: string; // ISO string YYYY-MM-DD
+  date: string; // YYYY-MM-DD
   topic: string;
   zone: string;
   content: string;

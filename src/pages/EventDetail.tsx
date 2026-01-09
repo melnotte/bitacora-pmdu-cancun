@@ -13,11 +13,18 @@ import {
   FaCalendarPlus,
   FaApple,
   FaFacebook,
-  FaLink
+  FaLink,
+  FaFileAlt,
+  FaClipboardList
 } from 'react-icons/fa';
 import { FaXTwitter, FaWhatsapp } from 'react-icons/fa6';
 
-
+// Interfaz auxiliar
+interface EvidenceData {
+  url: string;
+  uploadedAt?: string;
+  uploadedBy?: string;
+}
 
 const EventDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -33,17 +40,14 @@ const EventDetail = () => {
   ? `https://maps.google.com/maps?q=${event.lat},${event.lng}&z=17&output=embed`
   : `https://maps.google.com/maps?q=${encodeURIComponent(event.mapQuery || event.location)}&z=15&output=embed`;
 
-  // 1. MÉTODO PARA GOOGLE CALENDAR (Enlace directo)
+  // --- MÉTODOS DE CALENDARIO Y COMPARTIR  ---
   const handleGoogleCalendar = () => {
     const startDate = event.date.replace(/-/g, '') + 'T090000';
     const endDate = event.date.replace(/-/g, '') + 'T180000';
-    
     const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&details=${encodeURIComponent(event.description)}&location=${encodeURIComponent(event.location)}&dates=${startDate}/${endDate}`;
-    
     window.open(googleUrl, '_blank');
   };
 
-  // 2. MÉTODO iCAL (Descargable Universal)
   const handleICalDownload = () => {
     const now = new Date(); 
     const icsContent = `BEGIN:VCALENDAR
@@ -70,31 +74,40 @@ const EventDetail = () => {
     document.body.removeChild(link);
   };
 
-  // --- FUNCIONALIDAD: COMPARTIR ---
   const currentUrl = `${window.location.origin}/participa/${event.id}`;
   const shareText = `¡Participa en el evento: ${event.title}!`;
 
-  const shareOnWhatsApp = () => {
-    // API de WhatsApp Web/Mobile
-    const url = `https://wa.me/?text=${encodeURIComponent(shareText + ' ' + currentUrl)}`;
-    window.open(url, '_blank');
-  };
+  const shareOnWhatsApp = () => { window.open(`https://wa.me/?text=${encodeURIComponent(shareText + ' ' + currentUrl)}`, '_blank'); };
+  const shareOnFacebook = () => { window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}`, '_blank'); };
+  const shareOnX = () => { window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(currentUrl)}`, '_blank'); };
+  const copyLink = () => { navigator.clipboard.writeText(currentUrl); alert('Enlace copiado al portapapeles.'); };
 
-  const shareOnFacebook = () => {
-    // API de compartir de Facebook
-    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}`;
-    window.open(url, '_blank');
-  };
+  // --- HELPER ---
+  const renderEvidenceCard = (
+    data: string | EvidenceData | undefined, 
+    label: string, 
+    Icon: React.ElementType
+  ) => {
+    if (!data) return null;
 
-  const shareOnX = () => {
-    // API de compartir de X
-    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(currentUrl)}`;
-    window.open(url, '_blank');
-  };
+    const url = typeof data === 'string' ? data : data.url;
+    const date = typeof data !== 'string' ? data.uploadedAt : null;
+    const author = typeof data !== 'string' ? data.uploadedBy : null;
 
-  const copyLink = () => {
-    navigator.clipboard.writeText(currentUrl);
-    alert('Enlace copiado al portapapeles. ¡Listo para compartir!');
+    return (
+      <a href={url} className={styles.evidenceCard} target="_blank" rel="noreferrer">
+        <Icon className={styles.evidenceIcon} />
+        <span className={styles.evidenceTitle}>{label}</span>
+        
+        {/* Renderizado de Metadatos */}
+        {(date || author) && (
+          <div className={styles.evidenceMeta}>
+            {date && <span className={styles.metaDate}>Subido: {date}</span>}
+            {author && <span className={styles.metaAuthor}>Resp: {author}</span>}
+          </div>
+        )}
+      </a>
+    );
   };
 
   return (
@@ -137,8 +150,6 @@ const EventDetail = () => {
 
         {/* BOTONES DE ACCIÓN */}
         <div className={styles.actionButtons}>
-          
-          {/* Grupo Calendario */}
           <button onClick={handleGoogleCalendar} className={styles.iconButton} title="Agregar a Google Calendar">
             <FaCalendarPlus style={{ color: '#4285F4' }} /> Agregar a Calendar
           </button>
@@ -147,42 +158,22 @@ const EventDetail = () => {
              <FaApple /> Apple/Outlook (.ics)
           </button>
 
-          {/* Divisor Visual */}
           <div style={{ width: '1px', background: '#ddd', margin: '0 10px' }}></div>
 
           <span style={{ fontSize: '0.9rem', color: '#666', fontWeight: 500, alignSelf: 'center' }}>
-            Compartir en:
+            Compartir:
           </span>
 
-          {/* Grupo Redes Sociales */}
-          <button 
-            onClick={shareOnWhatsApp} 
-            className={styles.iconButton} 
-            style={{ color: '#25D366', borderColor: '#25D366' }}
-            title="Compartir en WhatsApp"
-          >
+          <button onClick={shareOnWhatsApp} className={styles.iconButton} style={{ color: '#25D366', borderColor: '#25D366' }}>
             <FaWhatsapp size={20} />
           </button>
-
-          <button 
-            onClick={shareOnFacebook} 
-            className={styles.iconButton} 
-            style={{ color: '#1877F2', borderColor: '#1877F2' }}
-            title="Compartir en Facebook"
-          >
+          <button onClick={shareOnFacebook} className={styles.iconButton} style={{ color: '#1877F2', borderColor: '#1877F2' }}>
             <FaFacebook size={20} />
           </button>
-
-          <button 
-            onClick={shareOnX} 
-            className={styles.iconButton} 
-            style={{ color: '#000000', borderColor: '#000000' }}
-            title="Compartir en X (Twitter)"
-          >
+          <button onClick={shareOnX} className={styles.iconButton} style={{ color: '#000000', borderColor: '#000000' }}>
             <FaXTwitter size={20} />
           </button>
-
-          <button onClick={copyLink} className={styles.iconButton} title="Copiar enlace">
+          <button onClick={copyLink} className={styles.iconButton}>
             <FaLink size={18} />
           </button>
         </div>
@@ -213,70 +204,54 @@ const EventDetail = () => {
 
       {/* LÓGICA CONDICIONAL: REGISTRO O EVIDENCIAS */}
       
-      {/* Caso 1: Evento Abierto -> Mostrar Registro */}
+      {/* Caso 1: Evento Abierto */}
       {event.status === 'abierto' && (
         <EventRegistration eventId={event.id} eventTitle={event.title} />
       )}
 
-      {/* Caso 2: Evento Finalizado -> Mostrar Evidencias */}
+      {/* Caso 2: Evento Finalizado -> Mostrar Evidencias Actualizadas */}
       {isPast && event.evidence && (
         <div className={styles.section}>
           <h3 className={styles.sectionTitle}>Evidencias y Resultados</h3>
-          <p style={{ marginBottom: '20px' }}>Consulta los documentos y materiales resultantes de esta sesión:</p>
+          <p style={{ marginBottom: '20px' }}>
+            Documentación oficial, metadatos y materiales resultantes de esta sesión:
+          </p>
+          
           <div className={styles.evidenceGrid}>
-            {event.evidence.reportUrl && (
-              <a href={event.evidence.reportUrl} className={styles.evidenceCard} target="_blank" rel="noreferrer">
-                <FaFilePdf className={styles.evidenceIcon} />
-                Minuta / Reporte (PDF)
-              </a>
-            )}
-            {event.evidence.presentationUrl && (
-              <a href={event.evidence.presentationUrl} className={styles.evidenceCard} target="_blank" rel="noreferrer">
-                <FaFilePdf className={styles.evidenceIcon} />
-                Presentación
-              </a>
-            )}
-            {event.evidence.videoUrl && (
-              <a href={event.evidence.videoUrl} className={styles.evidenceCard} target="_blank" rel="noreferrer">
-                <FaVideo className={styles.evidenceIcon} />
-                Grabación de la Sesión
-              </a>
-            )}
+            {/* Usamos el helper para renderizar cada tipo con sus metadatos */}
+            {renderEvidenceCard(event.evidence.reportUrl, 'Minuta / Reporte', FaFilePdf)}
+            {renderEvidenceCard(event.evidence.presentationUrl, 'Presentación', FaFilePdf)}
+            {renderEvidenceCard(event.evidence.attendanceUrl, 'Lista de Asistencia', FaClipboardList)}
+            {renderEvidenceCard(event.evidence.videoUrl, 'Grabación de Sesión', FaVideo)}
+            {renderEvidenceCard(event.evidence.transcriptUrl, 'Transcripción', FaFileAlt)}
+            
+            {/* Galería de fotos */}
             {event.evidence.photosUrl && (
-              <a href={event.evidence.photosUrl} className={styles.evidenceCard} target="_blank" rel="noreferrer">
+              <a href={typeof event.evidence.photosUrl === 'string' ? event.evidence.photosUrl : event.evidence.photosUrl.url} className={styles.evidenceCard} target="_blank" rel="noreferrer">
                 <FaImages className={styles.evidenceIcon} />
-                Galería de Fotos
+                <span className={styles.evidenceTitle}>Galería de Fotos</span>
               </a>
             )}
           </div>
         </div>
       )}
 
-      {/* SECCIÓN DE MAPA (Solo si es presencial) */}
+      {/* SECCIÓN DE MAPA */}
       {event.modality === 'Presencial' && mapSrc && (
         <div className={styles.section} style={{ marginTop: '50px' }}>
         <h3 className={styles.sectionTitle}>Ubicación</h3>
-        <p>
-          Cómo llegar a: <strong>{event.location}</strong>
-        </p>
-
+        <p>Cómo llegar a: <strong>{event.location}</strong></p>
         <div className={styles.mapContainer}>
-          <iframe
-            className={styles.mapFrame}
-            title="Mapa de Ubicación"
-            src={mapSrc}
-            loading="lazy"
-          />
+          <iframe className={styles.mapFrame} title="Mapa de Ubicación" src={mapSrc} loading="lazy" />
         </div>
       </div>
     )}
-
 
       {/* Caso 3: Evento Lleno */}
       {event.status === 'lleno' && (
         <div style={{ padding: '30px', background: '#ffebee', borderRadius: '8px', color: '#c62828', textAlign: 'center' }}>
           <h3>Registro Cerrado</h3>
-          <p>Lo sentimos, el cupo para este evento se ha completado. Mantente atento a futuras fechas.</p>
+          <p>Lo sentimos, el cupo se ha completado.</p>
         </div>
       )}
     </div>

@@ -1,8 +1,18 @@
+// Estructura para un items de evidencia con metadatos
+export interface EvidenceItem {
+  url: string;
+  uploadedAt?: string; // Fecha de carga
+  uploadedBy?: string; // Responsable
+}
+
+// Interfaz de Evidencias para soportar los nuevos tipos
 export interface EventEvidence {
-  reportUrl?: string;
-  presentationUrl?: string;
-  videoUrl?: string;
-  photosUrl?: string;
+  reportUrl?: EvidenceItem | string;       // Minuta / Reporte
+  presentationUrl?: EvidenceItem | string; // Presentación
+  videoUrl?: EvidenceItem | string;        // Grabación
+  photosUrl?: EvidenceItem | string;       // Galería
+  attendanceUrl?: EvidenceItem | string;   // Lista de Asistencia
+  transcriptUrl?: EvidenceItem | string;   // Transcripción
 }
 
 export interface Event {
@@ -10,7 +20,7 @@ export interface Event {
   title: string;
   date: string;      // Formato YYYY-MM-DD
   time: string;
-  location: string;  // front
+  location: string;
   lat?: number;      // coordenadas
   lng?: number;
   mapQuery?: string; // dirección en google
@@ -23,7 +33,6 @@ export interface Event {
   organizers?: string[];
   evidence?: EventEvidence;
 }
-
 
 export const events: Event[] = [
   {
@@ -67,8 +76,22 @@ export const events: Event[] = [
     status: "finalizado",
     description: "Sesión solemne de instalación del Comité de Planeación para el Desarrollo Municipal.",
     evidence: {
-      reportUrl: "/docs/acta-instalacion.pdf",
-      photosUrl: "/galeria/evento-003"
+      reportUrl: {
+        url: "/docs/acta-instalacion.pdf",
+        uploadedAt: "16 Ene 2024",
+        uploadedBy: "Secretaría Técnica"
+      },
+      presentationUrl: {
+        url: "/docs/presentacion-coplademun.pdf",
+        uploadedAt: "16 Ene 2024",
+        uploadedBy: "Dir. Planeación"
+      },
+      photosUrl: "/galeria/evento-003",
+      attendanceUrl: {
+        url: "/docs/lista-asistencia-003.pdf",
+        uploadedAt: "17 Ene 2024",
+        uploadedBy: "Administración"
+      }
     }
   },
   {

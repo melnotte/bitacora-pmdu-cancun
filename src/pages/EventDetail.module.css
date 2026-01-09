@@ -58,13 +58,69 @@
 .agendaTime { font-weight: bold; color: #005eb8; min-width: 80px; }
 
 /* Evidencias */
-.evidenceGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; }
-.evidenceCard {
-  background: #fdfdfd; border: 1px solid #ddd; padding: 20px; border-radius: 8px;
-  text-align: center; text-decoration: none; color: #555; transition: all 0.2s;
+.evidenceGrid { 
+  display: grid; 
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px; 
 }
-.evidenceCard:hover { border-color: #005eb8; color: #005eb8; transform: translateY(-3px); }
-.evidenceIcon { font-size: 2rem; margin-bottom: 10px; display: block; }
+
+.evidenceCard {
+  background: #fdfdfd; 
+  border: 1px solid #ddd; 
+  padding: 20px; 
+  border-radius: 8px;
+  text-align: center; 
+  text-decoration: none; 
+  color: #555; 
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  height: 100%;
+}
+
+.evidenceCard:hover { 
+  border-color: #005eb8; 
+  color: #005eb8; 
+  transform: translateY(-3px); 
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.evidenceIcon { 
+  font-size: 2rem; 
+  margin-bottom: 10px; 
+  display: block; 
+}
+
+.evidenceTitle {
+  font-weight: 600;
+  display: block;
+  margin-bottom: 8px;
+  line-height: 1.2;
+}
+
+/* Metadatos de evidencia */
+.evidenceMeta {
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px solid #eee;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: #888;
+}
+
+.metaDate, .metaAuthor {
+  display: block;
+}
+
+.evidenceCard:hover .evidenceMeta {
+  border-top-color: #cce0f5;
+  color: #666;
+}
 
 /* Mapa */
 .mapContainer {
@@ -73,7 +129,7 @@
   border-radius: 12px;
   overflow: hidden;
   border: 1px solid #eee;
-  background-color: #f0f0f0; /* Placeholder color */
+  background-color: #f0f0f0;
 }
 
 .mapFrame {

@@ -10,7 +10,7 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({ comments = [] })
   
   // --- CÁLCULOS DINÁMICOS ---
   
-  // 1. Totales por Estatus
+  // Totales por Estatus
   const statusStats = useMemo(() => {
     const counts = {
       'Recibido': 0,
@@ -35,7 +35,7 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({ comments = [] })
     ];
   }, [comments]);
 
-  // 2. Temas más comentados (Top 4)
+  // Top temas más comentados
   const topicStats = useMemo(() => {
     const topicMap: Record<string, number> = {};
     comments.forEach(c => {
@@ -54,14 +54,11 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({ comments = [] })
       }));
   }, [comments]);
 
-  // 3. Simulación de "Por Semana" (Agrupado por fecha simple para demo)
-  // En un caso real usaríamos librerías de fecha (date-fns) para agrupar por semana real.
+  // Simulación de Por Semana
   const weeklyStats = useMemo(() => {
-    // Dummy estático si hay pocos datos, o lógica simple 
     if (comments.length === 0) return [];
     
-    // Solo para efectos visuales, mostramos 5 barras fijas o calculadas
-    // Aquí dejaremos un mock visual basado en el total para no complicar la demo
+    // Mock visual basado en el total
     return [
         { week: 'Sem 1', count: Math.floor(comments.length * 0.1), height: '10%' },
         { week: 'Sem 2', count: Math.floor(comments.length * 0.2), height: '30%' },
@@ -91,7 +88,7 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({ comments = [] })
 
       <div className={styles.chartsContainer}>
         
-        {/* SECCIÓN 2: EVOLUCIÓN POR SEMANA (Simulada) */}
+        {/* SECCIÓN 2: EVOLUCIÓN POR SEMANA */}
         <div className={styles.chartSection}>
           <h4 className={styles.chartTitle}>Actividad Reciente</h4>
           <div className={styles.weeklyChart}>
