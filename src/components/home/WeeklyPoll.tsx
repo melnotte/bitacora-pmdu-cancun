@@ -71,9 +71,6 @@ export const WeeklyPoll = () => {
       <div className={styles.header}>
         <span className={styles.tag}>Pregunta Semanal</span>
         <h3 className={styles.question}>{currentPollData.question}</h3>
-        <p style={{ color: '#64748b', marginTop: '0.5rem', fontSize: '0.9rem' }}>
-          Selecciona la opción que mejor represente tu opinión.
-        </p>
       </div>
 
       <div className={styles.optionsGrid}>

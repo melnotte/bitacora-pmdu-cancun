@@ -1,0 +1,265 @@
+.card {
+  background: white;
+  border-radius: 0; 
+  border-top: 1px solid #e2e8f0;
+  border-bottom: 1px solid #e2e8f0;
+  border-left: none;
+  border-right: none;
+  box-shadow: none;
+  overflow: hidden;
+  margin-bottom: 0;
+  width: 100%;
+}
+
+.header {
+  background: #f8fafc;
+  padding: 1.2rem 2rem;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.headerLeft {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.badge {
+  background-color: #10b981;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 6px 12px;
+  border-radius: 50px;
+  letter-spacing: 0.05em;
+}
+
+.title {
+  margin: 0;
+  color: #1e293b;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.downloadIconBtn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #64748b;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: color 0.2s;
+}
+.downloadIconBtn:hover {
+    color: #005eb8;
+}
+
+/* --- GRID PRINCIPAL --- */
+.gridContainer {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+  max-width: 1400px; 
+  margin: 0 auto;
+}
+
+@media (min-width: 1024px) {
+  .gridContainer {
+    grid-template-columns: 65% 35%; 
+    min-height: 700px; 
+  }
+}
+
+@media (min-width: 900px) {
+  .gridContainer {
+    grid-template-columns: 60% 40%; 
+    min-height: 600px; 
+  }
+}
+
+/* COLUMNA PDF */
+.previewCol {
+  background-color: #e2e8f0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 500px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+@media (min-width: 1024px) {
+    .previewCol {
+        height: auto;
+        border-bottom: none;
+        border-right: 1px solid #e2e8f0;
+    }
+}
+
+@media (min-width: 900px) {
+    .previewCol {
+        height: auto;
+        border-bottom: none;
+        border-right: 1px solid #e2e8f0;
+    }
+}
+
+.pdfContainer {
+    flex: 1;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.pdfFrame {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+}
+
+.mobileFallback {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .pdfFrame {
+        display: none;
+    }
+    .mobileFallback {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        background-color: #f1f5f9;
+        gap: 1rem;
+        color: #64748b;
+        font-weight: 500;
+    }
+    .mobileBtn {
+        background: #005eb8;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 50px;
+        text-decoration: none;
+        font-size: 0.9rem;
+    }
+}
+
+.previewFooter {
+    background: white;
+    padding: 10px 20px;
+    font-size: 0.85rem;
+    color: #64748b;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.textLink {
+    color: #005eb8;
+    text-decoration: none;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.textLink:hover {
+    text-decoration: underline;
+}
+
+/* COLUMNA METADATOS */
+.metaCol {
+  padding: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.metaGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.metaItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.icon {
+  color: #94a3b8;
+  margin-top: 3px;
+}
+
+.label {
+  display: block;
+  font-size: 0.75rem;
+  color: #64748b;
+  margin-bottom: 2px;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.value {
+  font-weight: 600;
+  color: #334155;
+  font-size: 0.95rem;
+}
+
+.valueHighlight {
+  font-weight: 700;
+  color: #005eb8;
+}
+
+.sectionTitle {
+  font-size: 0.95rem;
+  color: #1e293b;
+  margin: 0 0 0.5rem 0;
+  font-weight: 700;
+}
+
+.changesText {
+  font-size: 0.9rem;
+  color: #475569;
+  line-height: 1.6;
+  background: #fffbeb;
+  padding: 1rem;
+  border-radius: 8px;
+  border-left: 3px solid #f59e0b;
+  margin: 0;
+}
+
+.relatedSection {
+  margin-top: auto;
+  font-size: 0.9rem;
+  padding-top: 1rem;
+}
+
+.relatedLabel {
+  color: #64748b;
+  margin-right: 10px;
+}
+
+.relatedLinks {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 5px;
+}
+
+.relatedLink {
+  color: #005eb8;
+  text-decoration: none;
+  font-weight: 500;
+}
+.relatedLink:hover { text-decoration: underline; }
