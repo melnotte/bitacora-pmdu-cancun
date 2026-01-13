@@ -165,3 +165,9 @@
   height: 100%;
   border-radius: 9999px;
 }
+
+@media (min-width: 1024px) {
+  .fullWidthChart {
+    grid-column: 1 / -1;
+  }
+}

@@ -1,5 +1,6 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { type Comment } from '../../data/commentsData';
+import { getPollResults, type Poll, currentPollData } from '../../data/pollData';
 import styles from './DashboardStats.module.css';
 
 interface DashboardStatsProps {
@@ -7,6 +8,15 @@ interface DashboardStatsProps {
 }
 
 export const DashboardStats: React.FC<DashboardStatsProps> = ({ comments = [] }) => {
+  
+  // Estado para la encuesta
+  const [pollData, setPollData] = useState<Poll>(currentPollData);
+
+  useEffect(() => {
+    // Simula fetch al backend
+    const data = getPollResults(currentPollData.id);
+    setPollData(data);
+  }, []);
   
   // --- CÁLCULOS DINÁMICOS ---
   
@@ -72,7 +82,7 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({ comments = [] })
   return (
     <div className={styles.container}>
       
-      {/* SECCIÓN 1: TOTALES POR ESTATUS */}
+      {/* SECCIÓN TOTALES POR ESTATUS */}
       <div className={styles.statsGrid}>
         {statusStats.map((stat) => (
           <div 
@@ -88,7 +98,7 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({ comments = [] })
 
       <div className={styles.chartsContainer}>
         
-        {/* SECCIÓN 2: EVOLUCIÓN POR SEMANA */}
+        {/* SECCIÓN EVOLUCIÓN POR SEMANA */}
         <div className={styles.chartSection}>
           <h4 className={styles.chartTitle}>Actividad Reciente</h4>
           <div className={styles.weeklyChart}>
@@ -109,7 +119,7 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({ comments = [] })
           </p>
         </div>
 
-        {/* SECCIÓN 3: TOTALES POR TEMA */}
+        {/* SECCIÓN TOTALES POR TEMA */}
         <div className={styles.chartSection}>
           <h4 className={styles.chartTitle}>Temas Recurrentes</h4>
           <div>
@@ -131,6 +141,35 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({ comments = [] })
               </div>
             )) : <p className="text-gray-400 text-center">No hay datos aún.</p>}
           </div>
+        </div>
+
+        {/* SECCIÓN ENCUESTA SEMANAL */}
+        <div className={`${styles.chartSection} ${styles.fullWidthChart}`}>
+            <h4 className={styles.chartTitle}>Resultados: Pregunta de la Semana</h4>
+            <p className="text-sm text-gray-500 mb-4">{pollData.question}</p>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                {pollData.options.map(opt => {
+                    const pct = pollData.totalVotes > 0 
+                        ? Math.round((opt.votes / pollData.totalVotes) * 100) 
+                        : 0;
+                    
+                    return (
+                        <div key={opt.id}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', marginBottom: '4px' }}>
+                                <span>{opt.label}</span>
+                                <span style={{ fontWeight: 'bold' }}>{pct}% ({opt.votes})</span>
+                            </div>
+                            <div style={{ width: '100%', backgroundColor: '#e5e7eb', borderRadius: '4px', height: '10px', overflow: 'hidden' }}>
+                                <div style={{ width: `${pct}%`, backgroundColor: '#005eb8', height: '100%' }}></div>
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+            <p className="text-xs text-center text-gray-400 mt-4">
+                Total de votos: {pollData.totalVotes}
+            </p>
         </div>
 
       </div>
