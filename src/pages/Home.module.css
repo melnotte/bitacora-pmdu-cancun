@@ -1,14 +1,11 @@
-/* --- Estilos del Hero --- */
+/* --- HERO SECTION --- */
 .hero {
   text-align: center;
   padding: 120px 20px 100px;
-  
-  /* Capa blanca sobre la imagen */
   background-image: linear-gradient(rgba(255, 255, 255, 0.60), rgba(255, 255, 255, 0.85)), url('../assets/hero.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  
   border-bottom: 1px solid #e2e8f0;
   color: #1e293b; 
 }
@@ -28,7 +25,6 @@
   font-weight: 800;
   letter-spacing: -0.03em;
   line-height: 1.1;
-  text-shadow: none; 
 }
 
 .highlight {
@@ -50,131 +46,23 @@
   min-width: 12px;
   transition: opacity 0.3s ease-in-out;
 }
-
 .fadeOut { opacity: 0; }
 .fadeIn { opacity: 1; }
 
-/* Botón "Ir a la consulta" */
-.ctaButton {
-  background-color: transparent;
-  color: #005eb8;
-  border: 2px solid #005eb8;
-  padding: 12px 30px;
-  border-radius: 50px;
-  font-weight: 700;
-  text-decoration: none;
-  transition: all 0.2s;
-}
-
-.ctaButton:hover {
-  background-color: #005eb8;
-  color: white;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 94, 184, 0.2);
-}
-
-/* --- Banner de Consulta --- */
-.consultationBanner {
-  background-color: #005eb8;
-  background-image: linear-gradient(135deg, #005eb8 0%, #003875 100%);
-  padding: 100px 20px;
-  color: white;
-  text-align: center;
-}
-
-.bannerContent {
-  max-width: 800px;
-  margin: 0 auto;
-}
-
-.bannerTitle {
-  font-size: 2.8rem;
-  font-weight: 700;
-  margin-bottom: 20px;
-}
-
-.bannerText {
-  font-size: 1.25rem;
-  opacity: 0.95;
-  line-height: 1.6;
-  margin-bottom: 40px;
-}
-
-.primaryButton {
-  display: inline-block;
-  background-color: #ffffff;
-  color: #005eb8;
-  font-size: 1.2rem;
-  font-weight: 700;
-  padding: 18px 40px;
-  border-radius: 50px;
-  text-decoration: none;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.primaryButton:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
-  background-color: #f9fafb;
-}
-
-@media (max-width: 768px) {
-  .heroTitle { font-size: 2.5rem; }
-  .bannerTitle { font-size: 2rem; }
-  .primaryButton { width: 100%; text-align: center; }
-  .hero { padding: 80px 20px; }
-}
-
-/* --- SECCIÓN CARRUSEL --- */
-.carouselSection {
+/* --- SECCIÓN DE CONSULTA --- */
+.consultationSection {
   background-color: #005eb8;
   background-image: linear-gradient(135deg, #005eb8 0%, #003875 100%);
   padding: 80px 20px;
   color: white;
-  position: relative;
-  overflow: hidden;
-  min-height: 500px;
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.carouselContainer {
-  max-width: 1000px;
-  width: 100%;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-}
-
-.slideContent {
-  flex: 1;
-  transition: opacity 0.4s ease, transform 0.4s ease;
-  opacity: 1;
-  transform: translateX(0);
-}
-
-.slideHidden {
-  display: none;
-}
-
-/* Estilos para la tarjeta de Encuesta */
-.pollCard {
-  background-color: #ffffff;
-  border-radius: 1rem;
-  padding: 2.5rem;
-  color: #1e293b;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-}
-
-/* Estilos para el contenido de Consulta */
-.consultationContent {
   text-align: center;
-  color: white;
-  padding: 2rem;
+}
+
+.consultationContent {
+  max-width: 800px;
   animation: fadeIn 0.5s ease;
 }
 
@@ -186,83 +74,142 @@
 
 .consultationText {
   font-size: 1.25rem;
-  margin-bottom: 2rem;
+  margin-bottom: 2.5rem;
   line-height: 1.6;
   opacity: 0.9;
-}
-
-/* --- BOTONES DE NAVEGACIÓN --- */
-.navButton {
-  background: rgba(255, 255, 255, 0.1);
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  color: white;
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 1.5rem;
-  transition: all 0.2s;
-  z-index: 10;
-}
-
-.navButton:hover {
-  background: white;
-  color: #005eb8;
-  transform: scale(1.1);
-}
-
-@media (max-width: 768px) {
-  .navButton {
-    position: absolute;
-    bottom: 10px;
-  }
-  .navButton.prev { left: 20px; }
-  .navButton.next { right: 20px; }
-  
-  .carouselSection {
-    padding-bottom: 80px;
-  }
-}
-
-/* Puntos */
-.indicators {
-  position: absolute;
-  bottom: 30px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 10px;
-}
-
-.dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.3);
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.dotActive {
-  background-color: white;
-  transform: scale(1.2);
 }
 
 .primaryButtonLight {
   background-color: white;
   color: #005eb8;
-  padding: 12px 30px;
+  padding: 15px 35px;
   border-radius: 50px;
   font-weight: 700;
   text-decoration: none;
   display: inline-block;
   transition: all 0.2s;
+  font-size: 1.1rem;
 }
+
 .primaryButtonLight:hover {
   background-color: #f1f5f9;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+/* --- BOTÓN FLOTANTE DE ENCUESTA --- */
+.pollTriggerButton {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 4px solid #fff;
+  background-color: #fff;
+  box-shadow: 0 8px 20px rgba(0, 94, 184, 0.4);
+  cursor: pointer;
+  z-index: 1000;
+  overflow: hidden;
+  transition: transform 0.3s ease;
+  animation: pulse-animation 2s infinite;
+}
+
+.pollTriggerButton:hover {
+  animation: none;
+  transform: scale(1.1) rotate(-5deg);
+  box-shadow: 0 12px 25px rgba(0, 94, 184, 0.6);
+}
+
+.pollTriggerImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Animación de pulso */
+@keyframes pulse-animation {
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 94, 184, 0.7);
+    transform: scale(1);
+  }
+  70% {
+    box-shadow: 0 0 0 15px rgba(0, 94, 184, 0);
+    transform: scale(1.05);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 94, 184, 0);
+    transform: scale(1);
+  }
+}
+
+/* --- MODAL --- */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(4px);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.3s ease;
+}
+
+.modalContent {
+  background: white;
+  width: 100%;
+  max-width: 600px;
+  border-radius: 20px;
+  padding: 2rem;
+  position: relative;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  animation: slideUp 0.3s ease;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.closeButton {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: #f1f5f9;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  color: #64748b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  z-index: 10;
+}
+
+.closeButton:hover {
+  background: #e2e8f0;
+  color: #ef4444;
+  transform: rotate(90deg);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@media (max-width: 768px) {
+  .heroTitle { font-size: 2.5rem; }
+  .consultationTitle { font-size: 2rem; }
+  .pollTriggerButton { width: 60px; height: 60px; bottom: 20px; right: 20px; }
 }
