@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import styles from './Home.module.css';
 import { WeeklyPoll } from '../components/home/WeeklyPoll';
+import { OfficialInstrumentSection } from '../components/home/OfficialInstrumentSection';
 import questionImg from '../assets/question.png';
 
 const Home = () => {
@@ -23,7 +24,7 @@ const Home = () => {
 
   return (
     <div>
-      {/* 1. HERO SECTION */}
+      {/* HERO SECTION */}
       <section className={styles.hero}>
         <div className={styles.heroContent}>
           <h1 className={styles.heroTitle}>
@@ -40,7 +41,10 @@ const Home = () => {
         </div>
       </section>
 
-      {/* 2. SECCIÓN DE CONSULTA */}
+      {/* SECCIÓN DE VALIDEZ OFICIAL */}
+      <OfficialInstrumentSection />
+
+      {/* SECCIÓN DE CONSULTA */}
       <section className={styles.consultationSection}>
         <div className={styles.consultationContent}>
           <h2 className={styles.consultationTitle}>Consulta Pública y Comentarios</h2>
@@ -54,7 +58,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* 3. BOTÓN FLOTANTE */}
+      {/* BOTÓN FLOTANTE */}
       <div 
         className={styles.pollTriggerButton} 
         onClick={() => setIsPollOpen(true)}
@@ -63,7 +67,7 @@ const Home = () => {
         <img src={questionImg} alt="Encuesta" className={styles.pollTriggerImg} />
       </div>
 
-      {/* 4. MODAL */}
+      {/* MODAL */}
       {isPollOpen && (
         <div className={styles.modalOverlay} onClick={() => setIsPollOpen(false)}>
           <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
