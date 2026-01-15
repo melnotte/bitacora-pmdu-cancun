@@ -1,21 +1,27 @@
 import Navbar from './layout/Navbar';
 import Footer from './layout/Footer';
 import PhaseBanner from './layout/PhaseBanner';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 
 const MainLayout = () => {
+  const location = useLocation();
+  const isMapPage = location.pathname.includes('/mapas');
+
   return (
-    // Reemplaza styles por clases de Tailwind
-    <div className="flex flex-col min-h-screen">
-      <PhaseBanner />
-      <Navbar />
+    <div className="flex flex-col w-full h-screen">
+      <div className="flex-none relative z-50">
+         <PhaseBanner />
+         <Navbar />
+      </div>
       
-      {/* Hace que el main ocupe todo el espacio disponible empujando al footer abajo */}
-      <main className="flex-1"> 
+      {/* Relative para que el mapa absolute se ancle a este bloque y no a la pantalla completa. */}
+      <main className={`flex-1 relative w-full ${isMapPage ? 'overflow-hidden' : 'overflow-auto'}`}> 
         <Outlet />
+        
+        {!isMapPage && (
+            <Footer />
+        )}
       </main>
-      
-      <Footer />
     </div>
   );
 };
