@@ -425,8 +425,9 @@
 /* MEDIA QUERIES PARA MÓVIL */
 @media (max-width: 768px) {
   .sidebar {
-    width: 100%;
-    max-width: 350px;
+    width: calc(100% - 48px);
+    max-width: 340px;
+    box-shadow: 4px 0 15px rgba(0,0,0,0.15);
   }
   .panelWithSidebar {
     left: 0 !important;
@@ -461,5 +462,11 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+  .toggleTab {
+    width: 32px;
+    height: 48px;
+    top: 70px;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.2); 
   }
 }
