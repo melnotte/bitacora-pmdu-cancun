@@ -32,10 +32,15 @@
   padding: 1rem;
   border-bottom: 1px solid #f1f5f9;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: 12px;
   background-color: #fff;
-  gap: 1px;
+}
+
+.headerButtons {
+  display: flex;
+  gap: 8px;
+  width: 100%;
 }
 
 .homeButton {
@@ -46,9 +51,17 @@
   transition: all 0.2s;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   padding: 8px 12px;
   font-size: 0.9rem;
+  flex: 1;
+}
+
+.copiedBtn {
+  color: #16a34a !important;
+  border-color: #16a34a !important;
+  background-color: #dcfce7 !important;
 }
 
 .homeButton:hover { 

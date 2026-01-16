@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState, useMemo } from 'react';
 import mapboxgl from 'mapbox-gl';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   FiLayers, FiChevronLeft, FiHome, FiChevronDown, 
   FiChevronRight, FiX, FiList, FiMap, FiDownload, FiFileText, 
-  FiSearch, FiTrash2
+  FiSearch, FiTrash2, FiShare2
 } from 'react-icons/fi';
 
 import 'mapbox-gl/dist/mapbox-gl.css';
@@ -50,7 +50,7 @@ const LAYER_GROUPS: LayerGroup[] = [
     layers: [
       {
         id: 'layer-poblacion',
-        name: 'Cambio Poblacional',
+        name: 'Cambio Poblacional (2010-2020)',
         type: 'fill',
         data: cambioPoblacionalData,
         uniqueIdField: 'CVE_AGEB',
@@ -111,23 +111,83 @@ const LAYER_GROUPS: LayerGroup[] = [
   }
 ];
 
+const getFeatureCenter = (feature: any) => {
+  if (feature.geometry.type === 'Point') return feature.geometry.coordinates;
+  const coords = feature.geometry.type === 'Polygon' 
+    ? feature.geometry.coordinates[0] 
+    : feature.geometry.coordinates[0][0];
+  let lngSum = 0, latSum = 0;
+  coords.forEach((c: number[]) => { lngSum += c[0]; latSum += c[1]; });
+  return [lngSum / coords.length, latSum / coords.length] as [number, number];
+};
+
+// FUNCIÓN HELPER PARA GENERAR EL HTML DEL POPUP
+const generateTooltipHTML = (feature: any, layerConfig: LayerConfig, styles: any) => {
+  let tableRows = '';
+  if (feature.properties) {
+      Object.entries(feature.properties).forEach(([key, value]) => {
+          if (key !== 'mapbox_id' && typeof value !== 'object') {
+              tableRows += `
+                <tr>
+                    <th>${key}</th>
+                    <td>${value}</td>
+                </tr>
+              `;
+          }
+      });
+  }
+
+  return `
+    <div style="display: flex; flex-direction: column; height: 100%;">
+      <div class="${styles.popupHeader}">
+        <div style="background:${layerConfig?.highlightColor || '#ccc'}; height:4px; width:100%; border-radius: 4px 4px 0 0;"></div>
+        <div style="padding: 10px 12px; padding-right: 30px;">
+            <strong style="color:#1e293b; display:block; font-size: 12px; line-height: 1.2;">
+                ${layerConfig.name}
+            </strong>
+        </div>
+      </div>
+      <div class="${styles.popupBody}">
+        <table class="${styles.popupTable}">
+            <tbody>
+                ${tableRows}
+            </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+};
+
 const Maps = () => {
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const searchParamsRef = useRef(searchParams);
+
+  useEffect(() => {
+    searchParamsRef.current = searchParams;
+  }, [searchParams]);
+
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const popupRef = useRef<mapboxgl.Popup | null>(null);
   const hoveredFeatureId = useRef<{ id: string | number; source: string } | null>(null);
+  const selectedFeatureId = useRef<{ id: string | number; source: string } | null>(null);
+  const isSwitchingSelection = useRef(false);
 
-  const navigate = useNavigate();
 
   // Estados UI
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [activeLayers, setActiveLayers] = useState<string[]>(['layer-poblacion']);
-  const [expandedGroups, setExpandedGroups] = useState<string[]>(['zonificacion-primaria']);
+  const [activeLayers, setActiveLayers] = useState<string[]>(() => {
+    const layersParam = searchParams.get('layers');
+    return layersParam ? layersParam.split(',') : ['layer-poblacion'];
+  });
+  const [isCopied, setIsCopied] = useState(false);  const [expandedGroups, setExpandedGroups] = useState<string[]>(['zonificacion-primaria']);
   const [activeTableLayer, setActiveTableLayer] = useState<LayerConfig | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
   // LÓGICA DE FILTRADO DE CAPAS
-  const filteredGroups = useMemo(() => {
+  const filteredGroups = useMemo(() => {  
     if (!searchTerm) return LAYER_GROUPS;
 
     const lowerTerm = searchTerm.toLowerCase();
@@ -145,6 +205,49 @@ const Maps = () => {
       return null;
     }).filter(Boolean) as LayerGroup[];
   }, [searchTerm]);
+  
+  // FUNCIÓN ACTUALIZAR URL
+  const updateUrlParams = (updates: Record<string, string | null>) => {
+    const currentParams = new URLSearchParams(searchParamsRef.current);
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value === null) currentParams.delete(key);
+      else currentParams.set(key, value);
+    });
+    setSearchParams(currentParams, { replace: true });
+  };
+
+  // FUNCIÓN DE BOTÓN COMPARTIR
+  const handleShareView = () => {
+    if (!map.current) return;
+
+    const url = new URL(window.location.href);
+
+    // 1. Zoom y Centro
+    const center = map.current.getCenter();
+    url.searchParams.set('lng', center.lng.toFixed(5));
+    url.searchParams.set('lat', center.lat.toFixed(5));
+    url.searchParams.set('zoom', map.current.getZoom().toFixed(2));
+
+    // 2. Capas
+    if (activeLayers.length > 0) {
+      url.searchParams.set('layers', activeLayers.join(','));
+    } else {
+      url.searchParams.delete('layers');
+    }
+
+    // 3. Feature/Polígono
+    if (selectedFeatureId.current && selectedFeatureId.current.id !== undefined && selectedFeatureId.current.id !== null) {
+       url.searchParams.set('feature', String(selectedFeatureId.current.id));
+    } else {
+       url.searchParams.delete('feature');
+    }
+
+    // 4. Copiar
+    navigator.clipboard.writeText(url.toString()).then(() => {
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+    });
+  };
 
   // Efecto para expandir grupos automáticamente al buscar
   useEffect(() => {
@@ -194,17 +297,36 @@ const Maps = () => {
   useEffect(() => {
     if (map.current || !mapContainer.current) return;
 
+    // LEER PARÁMETROS
+    const lat = parseFloat(searchParams.get('lat') || '21.1619');
+    const lng = parseFloat(searchParams.get('lng') || '-86.8475');
+    const zoom = parseFloat(searchParams.get('zoom') || '11.5');
+
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
       style: 'mapbox://styles/mapbox/light-v11',
-      center: [-86.8475, 21.1619],
-      zoom: 11.5,
+      center: [lng, lat],
+      zoom: zoom,
       pitch: 0,
       cooperativeGestures: false,
       touchZoomRotate: true
     });
 
     map.current.addControl(new mapboxgl.NavigationControl(), 'bottom-right');
+
+    map.current.on('moveend', () => {
+      const center = map.current!.getCenter();
+      updateUrlParams({
+        lng: center.lng.toFixed(5),
+        lat: center.lat.toFixed(5)
+      });
+    });
+
+    map.current.on('zoomend', () => {
+      updateUrlParams({
+        zoom: map.current!.getZoom().toFixed(2)
+      });
+    });
 
     map.current.on('load', () => {
       if (!map.current) return;
@@ -241,14 +363,88 @@ const Maps = () => {
               'line-color': layer.highlightColor,
               'line-width': [
                 'case',
-                ['boolean', ['feature-state', 'hover'], false],
+                ['any', 
+                  ['boolean', ['feature-state', 'hover'], false],
+                  ['boolean', ['feature-state', 'selected'], false]
+                ],
                 3,
                 0
-              ]
+              ]  
             }
           });
         });
       });
+
+      // Recuperar selección desde la URL al cargar
+      const params = new URLSearchParams(window.location.search);
+      const featureParam = params.get('feature');
+
+      if (featureParam) {
+          LAYER_GROUPS.forEach(group => {
+            group.layers.forEach(layer => {
+                // Buscamos el feature en los datos
+                const found = layer.data.features.find((f: any) => 
+                    String(f.properties[layer.uniqueIdField]) === featureParam
+                );
+                
+                if (found) {
+                    // 1. ACTIVAR CAPA
+                    if (!activeLayers.includes(layer.id)) {
+                        setActiveLayers(prev => [...prev, layer.id]);
+                    }
+
+                    const center = getFeatureCenter(found);
+                    const rawId = found.properties[layer.uniqueIdField]; 
+                    const featureId = found.id !== undefined ? found.id : rawId;
+                    const sourceId = `source-${layer.id}`;
+
+                    // 2. MARCAR ESTADO VISUAL 'SELECTED'
+                    if (featureId !== undefined) {
+                        setTimeout(() => {
+                            if (map.current) {
+                                map.current.setFeatureState(
+                                    { source: sourceId, id: featureId },
+                                    { selected: true }
+                                );
+                            }
+                        }, 200);
+                        
+                        selectedFeatureId.current = { source: sourceId, id: featureId };
+                    }
+                    
+                    // 3. CONSTRUIR HTML Y MOSTRAR POPUP
+                    const tooltipContent = generateTooltipHTML(found, layer, styles);
+
+                    const popup = new mapboxgl.Popup({ 
+                        closeButton: true, 
+                        closeOnClick: true, 
+                        className: styles.hoverPopup, 
+                        maxWidth: '260px' 
+                    })
+                    .setLngLat(center)
+                    .setHTML(tooltipContent)
+                    .addTo(map.current!);
+                    
+                    // Limpiar al cerrar
+                    popup.on('close', () => {
+                        if (isSwitchingSelection.current) return;
+
+                        if (selectedFeatureId.current) {
+                            map.current?.setFeatureState(
+                                { source: selectedFeatureId.current.source, id: selectedFeatureId.current.id },
+                                { selected: false }
+                            );
+                            selectedFeatureId.current = null;
+                        }
+                        updateUrlParams({ feature: null });
+                    });
+                    
+                    popupRef.current = popup;
+                    map.current!.flyTo({ center: center, zoom: 14 });
+                }
+            });
+          });
+      }
     });
 
     // --- INTERACCIONES ---
@@ -303,75 +499,83 @@ const Maps = () => {
       const feature = e.features[0];
       const layerId = feature.layer?.id;
       
+      if (!layerId) return;
+
+      const sourceId = `source-${layerId}`;
       const layerConfig = LAYER_GROUPS.flatMap(g => g.layers).find(l => l.id === layerId);
 
+      if (!layerConfig) return;
+
+      // --- GESTIÓN DE SELECCIÓN
+      // 1. Apagar selección anterior
+      if (selectedFeatureId.current) {
+          map.current?.setFeatureState(
+              { source: selectedFeatureId.current.source, id: selectedFeatureId.current.id },
+              { selected: false }
+          );
+      }
+
+      // 2. Encender nueva selección y actualizar URL
+      if (feature.id !== undefined) {
+          map.current?.setFeatureState(
+              { source: sourceId, id: feature.id },
+              { selected: true }
+          );
+          selectedFeatureId.current = { source: sourceId, id: feature.id };
+          updateUrlParams({ feature: String(feature.id) });
+      }
+
+      // 3. Gestión del popup
       if (popupRef.current) {
-        popupRef.current.remove();
+          isSwitchingSelection.current = true;
+          popupRef.current.remove();
+          isSwitchingSelection.current = false;
       }
 
       popupRef.current = new mapboxgl.Popup({
-        closeButton: true,      
-        closeOnClick: true,     
-        className: styles.hoverPopup,
-        maxWidth: '260px',
-        anchor: 'bottom',       
-        offset: 10
+          closeButton: true,      
+          closeOnClick: true,     
+          className: styles.hoverPopup,
+          maxWidth: '260px',
+          anchor: 'bottom',       
+          offset: 10
       });
 
-      // Genera HTML
-      let tableRows = '';
-      if (feature.properties) {
-          Object.entries(feature.properties).forEach(([key, value]) => {
-              if (key !== 'mapbox_id' && typeof value !== 'object') {
-                  tableRows += `
-                    <tr>
-                        <th>${key}</th>
-                        <td>${value}</td>
-                    </tr>
-                  `;
-              }
-          });
-      }
+      const tooltipContent = generateTooltipHTML(feature, layerConfig, styles);
 
-      const tooltipContent = `
-        <div style="display: flex; flex-direction: column; height: 100%;">
-          <div class="${styles.popupHeader}">
-            <div style="background:${layerConfig?.highlightColor || '#ccc'}; height:4px; width:100%; border-radius: 4px 4px 0 0;"></div>
-            <div style="padding: 10px 12px; padding-right: 30px;">
-                <strong style="color:#1e293b; display:block; font-size: 12px; line-height: 1.2;">
-                    ${layerConfig?.name}
-                </strong>
-            </div>
-          </div>
-          <div class="${styles.popupBody}">
-            <table class="${styles.popupTable}">
-                <tbody>
-                    ${tableRows}
-                </tbody>
-            </table>
-          </div>
-        </div>
-      `;
-
-      // 1. Muestra Popup en el punto del click
+      // Muestra Popup
       popupRef.current
-        .setLngLat(e.lngLat) 
-        .setHTML(tooltipContent)
-        .addTo(map.current!);
+          .setLngLat(e.lngLat)
+          .setHTML(tooltipContent)
+          .addTo(map.current!)
+          .on('close', () => {
+              // Si estamos cambiando de selección
+              if (isSwitchingSelection.current) return;
+
+              // Limpieza normal (solo si el usuario cierra el popup)
+              if (selectedFeatureId.current) {
+                  map.current?.setFeatureState(
+                      { source: selectedFeatureId.current.source, id: selectedFeatureId.current.id },
+                      { selected: false }
+                  );
+                  selectedFeatureId.current = null;
+              }
+              updateUrlParams({ feature: null });
+          });
       
-      // 2. Seguridad Scroll
+      // Seguridad Scroll
       const popupElement = popupRef.current.getElement();
       if(popupElement){
           popupElement.addEventListener('mouseenter', () => map.current?.scrollZoom.disable());
           popupElement.addEventListener('mouseleave', () => map.current?.scrollZoom.enable());
       }
 
-      // 3. Paneo en polígonos
+      // Paneo suave
       map.current!.flyTo({
-        center: e.lngLat,
-        speed: 0.5,
-        curve: 1,
-        offset: [0, 150] 
+          center: e.lngLat,
+          speed: 0.5,
+          curve: 1,
+          offset: [0, 150] 
       });
     });
 
@@ -390,6 +594,11 @@ const Maps = () => {
             map.current.setLayoutProperty(layer.id, 'visibility', isVisible);
         if (map.current?.getLayer(`${layer.id}-highlight`)) 
             map.current.setLayoutProperty(`${layer.id}-highlight`, 'visibility', isVisible);
+      });
+
+      // Guarda las capas activas en la URL cada vez que cambian
+      updateUrlParams({
+          layers: activeLayers.length > 0 ? activeLayers.join(',') : null
       });
     });
   }, [activeLayers]);
@@ -412,9 +621,22 @@ const Maps = () => {
               <FiMap /> Visor Interactivo
             </h2>
           </div>
-          <button className={styles.homeButton} onClick={() => navigate('/')} title="Inicio">
-            <FiHome size={16} /> Volver
-          </button>
+
+          <div className={styles.headerButtons}>
+              {/* BOTÓN COMPARTIR */}
+              <button 
+                className={`${styles.homeButton} ${isCopied ? styles.copiedBtn : ''}`} 
+                onClick={handleShareView} 
+                title="Copiar enlace"
+              >
+                <FiShare2 size={16} /> {isCopied ? '¡Copiado!' : 'Compartir'}
+              </button>
+
+              {/* BOTÓN VOLVER */}
+              <button className={styles.homeButton} onClick={() => navigate('/')} title="Inicio">
+                <FiHome size={16} /> Volver
+              </button>
+          </div>     
         </div>
 
         {/* BÚSQUEDA Y LIMPIEZA DE CAPAS */}
