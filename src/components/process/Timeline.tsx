@@ -23,7 +23,7 @@ const Timeline = () => {
     <div className={styles.timelineContainer}>
       <div className={styles.header}>
         <h2 className={styles.mainTitle}>Línea de Tiempo PMDU</h2>
-        <p className={styles.subtitle}>Seguimiento visual del Plan Municipal de Desarrollo Urbano</p>
+        <p className={styles.subtitle}>Seguimiento visual del Programa Municipal de Desarrollo Urbano</p>
       </div>
 
       <div className={styles.timeline}>

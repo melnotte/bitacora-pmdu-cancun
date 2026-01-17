@@ -81,7 +81,7 @@ const ParticipationPage = () => {
     <div className={styles.container}>
       <PageHeader 
         title="Participación Ciudadana" 
-        description="Encuentra talleres, foros y audiencias por zona o tema." 
+        description="Encuentra talleres, foros y consulta pública por zona o tema." 
       />
 
       {/* Tabs */}

@@ -7,7 +7,7 @@ const Footer = () => {
     <footer className={styles.footer}>
       <div className={styles.container}>
         <div className={styles.column}>
-          <h3>PMDU Cancún</h3>
+          <h3>PMDU Benito Juárez</h3>
           <p>Programa Municipal de Desarrollo Urbano</p>
           <div className={styles.socials}>
             <FaFacebook /> <FaXTwitter /> <FaInstagram />

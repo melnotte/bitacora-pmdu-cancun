@@ -14,7 +14,7 @@ const Navbar = () => {
       <div className={styles.container}>
         {/* Logo */}
         <Link to="/" className={styles.logo}>
-          PMDU Cancún
+          PMDU Benito Juárez
         </Link>
 
         {/* Botón Móvil */}
@@ -29,7 +29,7 @@ const Navbar = () => {
               <Link 
                 to={item.path} 
                 className={styles.navLink}
-                onClick={() => setIsOpen(false)} // Cierra menú al dar clic
+                onClick={() => setIsOpen(false)}
               >
                 {item.label}
               </Link>
