@@ -31,6 +31,7 @@ interface LayerConfig {
   data: any;
   uniqueIdField: string;
   documentUrl?: string;
+  pdfUrl?: string;
   highlightColor: string;
   paint: any;
   legend?: LegendItem[];
@@ -55,6 +56,7 @@ const LAYER_GROUPS: LayerGroup[] = [
         data: cambioPoblacionalData,
         uniqueIdField: 'CVE_AGEB',
         documentUrl: '/documentos?id=doc-001',
+        pdfUrl: '/documentos/mapa-poblacion-v1-hr.pdf',
         highlightColor: '#ffeb3b',
         paint: {
           'fill-color': [
@@ -87,6 +89,7 @@ const LAYER_GROUPS: LayerGroup[] = [
         data: indiceMarginacionData,
         uniqueIdField: 'CVEGEO',
         documentUrl: '/documentos?id=doc-011',
+        pdfUrl: '/documentos/mapa-marginacion.pdf',
         highlightColor: '#00bcd4',
         paint: {
           'fill-color': [
@@ -180,7 +183,7 @@ const Maps = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [activeLayers, setActiveLayers] = useState<string[]>(() => {
     const layersParam = searchParams.get('layers');
-    return layersParam ? layersParam.split(',') : ['layer-poblacion'];
+    return layersParam ? layersParam.split(',') : []; 
   });
   const [isCopied, setIsCopied] = useState(false);  const [expandedGroups, setExpandedGroups] = useState<string[]>(['zonificacion-primaria']);
   const [activeTableLayer, setActiveTableLayer] = useState<LayerConfig | null>(null);
@@ -684,21 +687,36 @@ const Maps = () => {
                                 />
                                 <span>{layer.name}</span>
                               </label>
-                              {activeLayers.includes(layer.id) && (
-                                  <button 
-                                    className={styles.btnViewTable} 
-                                    onClick={() => {
-                                      setActiveTableLayer(layer);
-                                      // Solo cerramos el sidebar si es una pantalla chica (móvil/tablet)
-                                      if (window.innerWidth <= 768) {
-                                        setIsSidebarOpen(false);
-                                      }
-                                    }}
-                                    title="Ver tabla de atributos"
-                                  >
-                                    <FiList size={14}/> Ver Tabla
-                                  </button>
-                              )}
+
+                              {/* ÁREA DE ACCIONES DE LA CAPA */}
+                              <div className={styles.layerActions}>
+                                {activeLayers.includes(layer.id) && (
+                                    <>
+                                      {/* Botón 1 - Tabla */}
+                                      <button 
+                                        className={styles.btnViewTable} 
+                                        onClick={() => {
+                                          setActiveTableLayer(layer);
+                                          if (window.innerWidth <= 768) setIsSidebarOpen(false);
+                                        }}
+                                        title="Ver tabla de atributos"
+                                      >
+                                        <FiList size={14}/>
+                                      </button>
+
+                                      {/* Botón 2 - PDF (Solo si existe pdfUrl) */}
+                                      {layer.pdfUrl && (
+                                          <button 
+                                            className={styles.btnDownloadMini} 
+                                            onClick={() => window.open(layer.pdfUrl, '_blank')}
+                                            title="Descargar Mapa PDF"
+                                          >
+                                            <FiDownload size={14}/>
+                                          </button>
+                                      )}
+                                    </>
+                                )}
+                              </div>
                           </div>
                           {activeLayers.includes(layer.id) && layer.legend && (
                             <div className={styles.legendContainer}>
