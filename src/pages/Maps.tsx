@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useMemo } from 'react';
 import mapboxgl from 'mapbox-gl';
+import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   FiLayers, FiChevronLeft, FiHome, FiChevronDown, 
@@ -15,7 +16,7 @@ import styles from './Maps.module.css';
 import cambioPoblacionalData from '../data/cambio-poblacional.json';
 import indiceMarginacionData from '../data/indice-marginacion.json';
 
-const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
+const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || '';
 mapboxgl.accessToken = MAPBOX_TOKEN;
 
 // TIPOS
@@ -315,7 +316,20 @@ const Maps = () => {
       touchZoomRotate: true
     });
 
-    map.current.addControl(new mapboxgl.NavigationControl(), 'bottom-right');
+    // --- CONTROLES DEL MAPA ---
+    // 1. Geocoder (Buscador de direcciones)
+    const geocoder = new MapboxGeocoder({
+      accessToken: MAPBOX_TOKEN, 
+      mapboxgl: mapboxgl as any,
+      placeholder: 'Buscar dirección o lugar...',
+      marker: {
+        color: '#ef4444'
+      } as any
+    });
+    map.current.addControl(geocoder, 'top-right');
+
+    // 2. Controles de navegación (Zoom +/-)
+    map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
     map.current.on('moveend', () => {
       const center = map.current!.getCenter();
