@@ -1,5 +1,5 @@
 import { useParams, Link } from 'react-router-dom';
-import { events } from '../data/eventsData';
+import { type Event } from '../types';
 import EventRegistration from '../components/agenda/EventRegistration';
 import styles from './EventDetail.module.css';
 import { 

@@ -1,9 +1,9 @@
-import type { PMDUDocument } from '../../data/documentsData';
-import styles from './DocumentCard.module.css';
 import { FaFileDownload, FaCalendarAlt, FaCodeBranch, FaEye } from 'react-icons/fa';
+import styles from './DocumentCard.module.css';
+import type { UIDocument } from '../../types';
 
 interface Props {
-  doc: PMDUDocument;
+  doc: UIDocument;
 }
 
 const DocumentCard = ({ doc }: Props) => {
@@ -12,7 +12,7 @@ const DocumentCard = ({ doc }: Props) => {
       <div>
         <div className={styles.header}>
           <span className={styles.typeBadge} data-type={doc.type}>{doc.type}</span>
-          <span className={styles.typeBadge}>{doc.size}</span>
+          {doc.size && <span className={styles.typeBadge}>{doc.size}</span>}
         </div>
         
         <h3 className={styles.title}>{doc.title}</h3>
@@ -21,9 +21,11 @@ const DocumentCard = ({ doc }: Props) => {
           <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
             <FaCalendarAlt size={12} /> {doc.date}
           </span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <FaCodeBranch size={12} /> {doc.version}
-          </span>
+          {doc.version && (
+            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <FaCodeBranch size={12} /> {doc.version}
+            </span>
+          )}
         </div>
 
         <p className={styles.description}>{doc.description}</p>
@@ -51,7 +53,7 @@ const DocumentCard = ({ doc }: Props) => {
           </a>
         </div>
 
-        {doc.tags.length > 0 && (
+        {doc.tags && doc.tags.length > 0 && (
           <div className={styles.tags}>
             {doc.tags.map(tag => (
               <span key={tag} className={styles.tag}>#{tag}</span>

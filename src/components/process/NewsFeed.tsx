@@ -1,22 +1,50 @@
-import { useState } from 'react';
-import { newsPosts } from '../../data/processData';
+import { useEffect, useState } from 'react';
+import { supabase } from '../../lib/supabase';
+import type { PostRow } from '../../types';
 import { FaSearch, FaFilter } from 'react-icons/fa';
 import styles from './NewsFeed.module.css';
 
 const NewsFeed = () => {
+  const [posts, setPosts] = useState<PostRow[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('Todas');
 
   // Lógica de filtrado
-  const filteredPosts = newsPosts.filter(post => {
-    const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          post.content.toLowerCase().includes(searchTerm.toLowerCase());
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('posts')
+          .select('*')
+          .order('published_at', { ascending: false });
+
+        if (error) throw error;
+        setPosts(data || []);
+      } catch (err) {
+        console.error('Error cargando noticias:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPosts();
+  }, []);
+
+  const filteredPosts = posts.filter(post => {
+    const term = searchTerm.toLowerCase();
+    const matchesSearch = 
+      post.title.toLowerCase().includes(term) || 
+      (post.content && post.content.toLowerCase().includes(term));
+      
     const matchesCategory = categoryFilter === 'Todas' || post.category === categoryFilter;
     
     return matchesSearch && matchesCategory;
   });
 
   const categories = ['Todas', 'Taller', 'Avance', 'Comunicado', 'Hito'];
+
+  if (loading) return <div style={{textAlign: 'center', padding: '2rem'}}>Cargando bitácora...</div>;
 
   return (
     <div className={styles.feedContainer}>
@@ -26,8 +54,7 @@ const NewsFeed = () => {
       <div className={styles.controls}>
         <div className={styles.searchBox}>
           <FaSearch className={styles.searchIcon} />
-          <input 
-            type="text" 
+          <input
             placeholder="Buscar en la bitácora..." 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -53,8 +80,8 @@ const NewsFeed = () => {
           filteredPosts.map(post => (
             <article key={post.id} className={styles.card}>
               <div className={styles.cardHeader}>
-                <span className={`${styles.badge} ${styles[post.category]}`}>{post.category}</span>
-                <span className={styles.cardDate}>{post.date}</span>
+                <span className={`${styles.badge} ${styles[post.category || 'Comunicado']}`}> {post.category || 'Comunicado'}</span>
+                <span className={styles.cardDate}>{post.published_at}</span>
               </div>
               <h3 className={styles.cardTitle}>{post.title}</h3>
               <p className={styles.cardContent}>{post.content}</p>

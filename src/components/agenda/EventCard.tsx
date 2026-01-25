@@ -1,4 +1,4 @@
-import { type Event } from '../../data/eventsData';
+import { type Event } from '../../types';
 import { FaCalendarDay, FaMapMarkerAlt } from 'react-icons/fa';
 import styles from './EventCard.module.css';
 
@@ -10,7 +10,7 @@ interface EventCardProps {
 const EventCard = ({ event, onClick }: EventCardProps) => {
   const isPast = event.status === 'finalizado';
 
-  // Formatear fecha para que se vea bonita
+  // Formatear fecha
   const formatDate = (dateStr: string) => {
     const options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'long', year: 'numeric' };
     return new Date(dateStr + 'T00:00:00').toLocaleDateString('es-MX', options);

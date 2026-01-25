@@ -1,22 +1,49 @@
+import { useEffect, useState } from 'react';
+import { supabase } from '../lib/supabase';
+import type { InstrumentRow, RelatedLink } from '../types';
 import Timeline from '../components/process/Timeline';
 import NewsFeed from '../components/process/NewsFeed';
 import PageHeader from '../components/layout/PageHeader';
 import { CurrentVersionCard } from '../components/process/CurrentVersionCard';
 
-const currentDocData = {
-  version: "2.1 - Borrador Técnico",
-  date: "12 Enero 2024",
-  stage: "Consulta Pública",
-  responsible: "Dirección de Planeación (IMPLAN)",
-  summaryChanges: "Se actualizaron las tablas de uso de suelo del Polígono Sur e incorporaron las observaciones de los talleres vecinales realizados en Noviembre 2023.",
-  downloadUrl: "/documentos/pmdu-borrador-v2.1.pdf",
-  relatedDocs: [
-    { title: "Versión Anterior (v1.0)", url: "/documentos" },
-    { title: "Anexos Técnicos", url: "/documentos" }
-  ]
-};
-
 const ProcessPage = () => {
+
+  const [instrument, setInstrument] = useState<InstrumentRow | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchInstrument = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('official_instruments')
+          .select('*')
+          .eq('is_active', true)
+          .single();
+
+        if (error) {
+           if (error.code !== 'PGRST116') console.error(error); 
+        } else {
+          setInstrument(data);
+        }
+      } catch (err) {
+        console.error('Error fetching instrument:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchInstrument();
+  }, []);
+
+  // Función helper para transformar el JSONB a nuestro tipo RelatedLink[]
+  const getRelatedDocs = (jsonLinks: any): RelatedLink[] => {
+    if (Array.isArray(jsonLinks)) {
+      return jsonLinks as RelatedLink[];
+    }
+    return [];
+  };
+
+
   return (
     <div style={{ paddingBottom: '40px' }}>
 
@@ -31,7 +58,23 @@ const ProcessPage = () => {
 
       {/* SECCIÓN DOCUMENTO */}
       <div style={{ width: '100%', marginBottom: '4rem', marginTop: '2rem' }}>
-          <CurrentVersionCard {...currentDocData} />
+          {loading ? (
+             <p style={{textAlign: 'center'}}>Cargando...</p>
+          ) : instrument ? (
+             <CurrentVersionCard 
+                version={instrument.version || "N/A"}
+                date={instrument.publish_date || "Sin fecha"}
+                stage={instrument.status === 'vigente' ? 'Vigente' : 'En Aprobación'} 
+                responsible={instrument.responsible || "IMPLAN"}
+                summaryChanges={instrument.summary_changes || "Sin cambios registrados."}
+                downloadUrl={instrument.final_document_url || "#"}
+                relatedDocs={getRelatedDocs(instrument.related_links)}
+             />
+          ) : (
+             <div style={{textAlign: 'center', padding: '2rem', color: '#666'}}>
+                <p>No hay un instrumento oficial activo en este momento.</p>
+             </div>
+          )}
       </div>
 
       {/* SECCIÓN LÍNEA DE TIEMPO */}
@@ -42,9 +85,6 @@ const ProcessPage = () => {
         </section>
 
         <section style={{ marginBottom: '5rem' }}>
-          <h2 style={{ fontSize: '2rem', marginBottom: '2rem', textAlign: 'center', color: '#1e293b' }}>
-            Bitácora de Actividades
-          </h2>
           <NewsFeed />
         </section>
       </div>
