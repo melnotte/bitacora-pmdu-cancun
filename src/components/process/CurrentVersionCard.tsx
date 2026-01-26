@@ -1,35 +1,38 @@
 import { FaFilePdf, FaCalendarAlt, FaCodeBranch, FaUserTie, FaInfoCircle, FaExternalLinkAlt } from 'react-icons/fa';
 import styles from './CurrentVersionCard.module.css';
-
-interface RelatedDoc {
-  title: string;
-  url: string;
-}
+import type { RelatedLink } from '../../types';
 
 interface CurrentVersionProps {
   version: string;
   date: string;
+  status: string | null;
   stage: string;
   responsible: string;
   summaryChanges: string;
   downloadUrl: string;
-  relatedDocs?: RelatedDoc[];
+  relatedDocs?: RelatedLink[];
 }
 
 export const CurrentVersionCard = ({
   version,
   date,
+  status,
   stage,
   responsible,
   summaryChanges,
   downloadUrl,
   relatedDocs
 }: CurrentVersionProps) => {
+
+  const isVigente = status === 'vigente';
+  const badgeText = isVigente ? 'DOCUMENTO VIGENTE' : 'EN APROBACIÓN';
+  const badgeStyle = isVigente ? styles.badge : `${styles.badge} ${styles.badgeWarning}`;
+
   return (
     <div className={styles.card}>
       <div className={styles.header}>
         <div className={styles.headerLeft}>
-           <div className={styles.badge}>DOCUMENTO VIGENTE</div>
+           <div className={badgeStyle}>{badgeText}</div>
            <h3 className={styles.title}>Programa Municipal de Desarrollo Urbano</h3>
         </div>
         <a href={downloadUrl} download className={styles.downloadIconBtn} title="Descargar PDF">
@@ -86,7 +89,7 @@ export const CurrentVersionCard = ({
             <div className={styles.metaItem}>
               <FaInfoCircle className={styles.icon} />
               <div>
-                <span className={styles.label}>Etapa</span>
+                <span className={styles.label}>Etapa Actual</span>
                 <span className={styles.valueHighlight}>{stage}</span>
               </div>
             </div>
@@ -109,7 +112,7 @@ export const CurrentVersionCard = ({
               <span className={styles.relatedLabel}>Documentos relacionados:</span>
               <div className={styles.relatedLinks}>
                 {relatedDocs.map((doc, idx) => (
-                  <a key={idx} href={doc.url} className={styles.relatedLink}>
+                  <a key={idx} href={doc.url} className={styles.relatedLink} target="_blank" rel="noreferrer">
                     {doc.title} ↗
                   </a>
                 ))}

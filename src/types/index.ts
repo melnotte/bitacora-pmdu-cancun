@@ -1,7 +1,6 @@
 import type { Database } from './supabase';
 
-// --- TIPOS DE BASE DE DATOS (Filas puras) ---
-// Extraemos la definición exacta de la BD
+// --- TIPOS DE LA BASE DE DATOS ---
 export type PhaseRow = Database['public']['Tables']['process_phases']['Row'];
 export type DocumentRow = Database['public']['Tables']['documents']['Row'];
 export type EventRow = Database['public']['Tables']['events']['Row'];
@@ -16,13 +15,20 @@ export interface RelatedLink {
   url: string;
 }
 
+export interface Instrument extends InstrumentRow {
+  phase?: {
+    title: string;
+    status: string;
+  };
+}
+
 // Relaciones complejas (Joins)
 export interface ProcessPhase extends PhaseRow {
   documents: DocumentRow[];
   events: EventRow[];
 }
 
-// --- TIPOS PARA VISTAS (View Models) ---
+// --- TIPOS PARA VISTAS ---
 
 // Para selectores o tabs donde solo necesitamos ID y Título
 export interface PhaseSimple {
@@ -31,8 +37,7 @@ export interface PhaseSimple {
   order_index: number;
 }
 
-// Para la tarjeta de documento (Adapter entre BD y UI)
-// Esto define qué forma tienen los datos YA procesados para el frontend
+// Para la tarjeta de documento
 export interface UIDocument {
   id: string;
   title: string;
@@ -45,3 +50,27 @@ export interface UIDocument {
   tags: string[] | null;
   version: string | null;
 }
+
+// --- TIPOS DE EVIDENCIA ---
+export interface EvidenceItem {
+  url: string;
+  uploadedAt?: string;
+  uploadedBy?: string;
+}
+
+export interface EventEvidence {
+  reportUrl?: EvidenceItem | string;       
+  presentationUrl?: EvidenceItem | string; 
+  videoUrl?: EvidenceItem | string;        
+  photosUrl?: EvidenceItem | string;       
+  attendanceUrl?: EvidenceItem | string;   
+  transcriptUrl?: EvidenceItem | string;   
+}
+
+// --- TIPO UI EVENT ---
+export interface UIEvent extends Omit<EventRow, 'evidence' | 'time'> {
+  evidence?: EventEvidence;
+  start_time: string;      // Viene como "10:00:00"
+  end_time: string | null; // Puede ser null
+}
+

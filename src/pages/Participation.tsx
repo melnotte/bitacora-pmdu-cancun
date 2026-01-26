@@ -1,12 +1,13 @@
-import { useState, useMemo } from 'react';
-import { events } from '../data/eventsData';
+import { useState, useMemo, useEffect } from 'react';
+import { supabase } from '../lib/supabase';
+import type { UIEvent } from '../types';
 import EventCard from '../components/agenda/EventCard';
 import styles from './Participation.module.css';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import PageHeader from '../components/layout/PageHeader';
 
-const ITEMS_PER_PAGE = 3;
+const ITEMS_PER_PAGE = 6;
 
 const ParticipationPage = () => {
 
@@ -15,6 +16,8 @@ const ParticipationPage = () => {
   // --- ESTADOS ---
   const [activeTab, setActiveTab] = useState<'proximos' | 'pasados'>('proximos');
   const [currentPage, setCurrentPage] = useState(1);
+  const [dbEvents, setDbEvents] = useState<UIEvent[]>([]);
+  const [loading, setLoading] = useState(true);
   
   // Filtros
   const [filters, setFilters] = useState({
@@ -25,10 +28,37 @@ const ParticipationPage = () => {
     dateEnd: ''
   });
 
+  // --- CARGAR DATOS DE SUPABASE ---
+  useEffect(() => {
+    const fetchEvents = async () => {
+      setLoading(true);
+      try {
+        // Traemos todos los eventos ordenados por fecha
+        const { data, error } = await supabase
+          .from('events')
+          .select('*')
+          .order('date', { ascending: false });
+
+        if (error) {
+          console.error('Error cargando eventos:', error);
+        } else if (data) {
+          setDbEvents(data as unknown as UIEvent[]);
+        }
+      } catch (err) {
+        console.error('Error inesperado:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, []);
+
   // --- LÓGICA DE FILTRADO ---
   const filteredEvents = useMemo(() => {
-    return events.filter(event => {
-      // 1. Filtrar por Tab (Próximos vs Pasados)
+    return dbEvents.filter(event => {
+      // 1. Filtrar por Tab
+      if (!event.date) return false;
       const eventDate = new Date(event.date + 'T00:00:00');
       const today = new Date();
       today.setHours(0,0,0,0);
@@ -47,13 +77,9 @@ const ParticipationPage = () => {
       if (filters.dateEnd && event.date > filters.dateEnd) return false;
 
       return true;
-    }).sort((a, b) => {
-      // Ordenamiento
-      const dateA = new Date(a.date).getTime();
-      const dateB = new Date(b.date).getTime();
-      return activeTab === 'proximos' ? dateA - dateB : dateB - dateA;
     });
-  }, [activeTab, filters]);
+    
+  }, [dbEvents, activeTab, filters]);
 
   // --- LÓGICA DE PAGINACIÓN ---
   const totalPages = Math.ceil(filteredEvents.length / ITEMS_PER_PAGE);
@@ -74,7 +100,7 @@ const ParticipationPage = () => {
   };
 
   const handleEventClick = (id: string) => {
-    navigate(`/participa/${id}`); 
+    navigate(`/participa/${id}`);
   };
 
   return (
@@ -100,7 +126,7 @@ const ParticipationPage = () => {
         </button>
       </div>
 
-      {/* Panel de Filtros Completo */}
+      {/* Panel de Filtros */}
       <div className={styles.filtersContainer}>
         <div className={styles.filterGroup}>
           <label>Tema:</label>
@@ -113,7 +139,7 @@ const ParticipationPage = () => {
             <option value="Taller">Talleres</option>
             <option value="Conferencia">Conferencias</option>
             <option value="Mesa de Trabajo">Mesas de Trabajo</option>
-            <option value="Audiencia">Audiencias</option>
+            <option value="Participación Ciudadana">Participación Ciudadana</option>
           </select>
         </div>
 
@@ -174,7 +200,9 @@ const ParticipationPage = () => {
       </div>
 
       <div className={styles.grid}>
-        {paginatedEvents.length > 0 ? (
+        {loading ? (
+          <p>Cargando eventos...</p>
+        ) : paginatedEvents.length > 0 ? (
           paginatedEvents.map(event => (
             <EventCard 
               key={event.id} 

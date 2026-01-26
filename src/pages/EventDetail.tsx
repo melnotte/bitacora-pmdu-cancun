@@ -1,9 +1,11 @@
+import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { type Event } from '../types';
+import { supabase } from '../lib/supabase';
+import { type UIEvent, type EvidenceItem } from '../types';
 import EventRegistration from '../components/agenda/EventRegistration';
 import styles from './EventDetail.module.css';
 import { 
-  FaArrowLeft, 
+  FaArrowLeft,  
   FaCalendarAlt, 
   FaMapMarkerAlt, 
   FaUsers, 
@@ -19,50 +21,113 @@ import {
 } from 'react-icons/fa';
 import { FaXTwitter, FaWhatsapp } from 'react-icons/fa6';
 
-// Interfaz auxiliar
-interface EvidenceData {
-  url: string;
-  uploadedAt?: string;
-  uploadedBy?: string;
-}
-
 const EventDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const event = events.find(e => e.id === id);
+  const [event, setEvent] = useState<UIEvent | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchEvent = async () => {
+      if (!id) return;
+      
+      const { data, error } = await supabase
+        .from('events')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (!error && data) {
+        setEvent((data as unknown) as UIEvent);
+      }
+      setLoading(false);
+    };
+
+    fetchEvent();
+  }, [id]);
+
+  // --- HELPERS DE FORMATO ---
+  const formatDate = (dateStr: string | null) => {
+    if (!dateStr) return 'Fecha por definir';
+    const options: Intl.DateTimeFormatOptions = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+    return new Date(`${dateStr}T00:00:00`).toLocaleDateString('es-MX', options);
+  };
+
+  const formatTimeRange = (start: string | null, end: string | null) => {
+    const s = start?.slice(0, 5) || '';
+    if (!end) return `${s} hrs`;
+    const e = end.slice(0, 5);
+    return `${s} - ${e} hrs`;
+  };
+
+  // Helper para evidencias
+  const renderEvidenceCard = (
+    item: string | EvidenceItem | undefined | null, 
+    title: string, 
+    Icon: any
+  ) => {
+    if (!item) return null;
+    
+    const url = typeof item === 'string' ? item : item.url;
+    const date = typeof item !== 'string' ? item.uploadedAt : null;
+    const author = typeof item !== 'string' ? item.uploadedBy : null;
+    
+    return (
+      <a href={url} className={styles.evidenceCard} target="_blank" rel="noreferrer">
+        <Icon className={styles.evidenceIcon} />
+        <span className={styles.evidenceTitle}>{title}</span>
+        {(date || author) && (
+          <div className={styles.evidenceMeta}>
+             {date && <span className={styles.metaDate}>{date}</span>}
+          </div>
+        )}
+      </a>
+    );
+  };
+
+  if (loading) return <div style={{textAlign: 'center', padding: '50px'}}>Cargando...</div>;
 
   if (!event) {
-    return <div style={{ textAlign: 'center', padding: '50px' }}><h2>Evento no encontrado</h2><Link to="/participa">Volver a la agenda</Link></div>;
+    return (
+        <div style={{ textAlign: 'center', padding: '50px' }}>
+            <h2>Evento no encontrado</h2>
+            <Link to="/participa" className={styles.backLink}>Volver a la agenda</Link>
+        </div>
+    );
   }
 
   const isPast = event.status === 'finalizado';
 
+  // Fallback si no hay coordenadas
   const mapSrc = event.lat && event.lng
-  ? `https://maps.google.com/maps?q=${event.lat},${event.lng}&z=17&output=embed`
-  : `https://maps.google.com/maps?q=${encodeURIComponent(event.mapQuery || event.location)}&z=15&output=embed`;
+    ? `https://maps.google.com/maps?q=${event.lat},${event.lng}&z=17&output=embed`
+    : `https://maps.google.com/maps?q=${encodeURIComponent(event.location || '')}&z=15&output=embed`;
 
-  // --- MÉTODOS DE CALENDARIO Y COMPARTIR  ---
+  // --- MÉTODOS DE CALENDARIO Y COMPARTIR ---
+  
   const handleGoogleCalendar = () => {
+    if (!event.date) return;
     const startDate = event.date.replace(/-/g, '') + 'T090000';
     const endDate = event.date.replace(/-/g, '') + 'T180000';
-    const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&details=${encodeURIComponent(event.description)}&location=${encodeURIComponent(event.location)}&dates=${startDate}/${endDate}`;
+    const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&details=${encodeURIComponent(event.description || '')}&location=${encodeURIComponent(event.location || '')}&dates=${startDate}/${endDate}`;
     window.open(googleUrl, '_blank');
   };
 
   const handleICalDownload = () => {
+    if (!event.date) return;
     const now = new Date(); 
     const icsContent = `BEGIN:VCALENDAR
-      VERSION:2.0
-      PRODID:-//PMDU Cancun//Eventos//ES
-      BEGIN:VEVENT
-      UID:${event.id}@pmducancun.gob.mx
-      DTSTAMP:${now.toISOString().replace(/[-:]/g, '').split('.')[0]}Z
-      DTSTART:${event.date.replace(/-/g, '')}T090000
-      DTEND:${event.date.replace(/-/g, '')}T180000
-      SUMMARY:${event.title}
-      DESCRIPTION:${event.description}
-      LOCATION:${event.location}
-      END:VEVENT
-      END:VCALENDAR`;
+    VERSION:2.0
+    PRODID:-//PMDU Cancun//Eventos//ES
+    BEGIN:VEVENT
+    UID:${event.id}@pmducancun.gob.mx
+    DTSTAMP:${now.toISOString().replace(/[-:]/g, '').split('.')[0]}Z
+    DTSTART:${event.date.replace(/-/g, '')}T090000
+    DTEND:${event.date.replace(/-/g, '')}T180000
+    SUMMARY:${event.title}
+    DESCRIPTION:${event.description || ''}
+    LOCATION:${event.location || ''}
+    END:VEVENT
+    END:VCALENDAR`;
 
     const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
     const url = window.URL.createObjectURL(blob);
@@ -74,41 +139,14 @@ const EventDetail = () => {
     document.body.removeChild(link);
   };
 
-  const currentUrl = `${window.location.origin}/participa/${event.id}`;
+  // URL para compartir
+  const currentUrl = window.location.href;
   const shareText = `¡Participa en el evento: ${event.title}!`;
 
   const shareOnWhatsApp = () => { window.open(`https://wa.me/?text=${encodeURIComponent(shareText + ' ' + currentUrl)}`, '_blank'); };
   const shareOnFacebook = () => { window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}`, '_blank'); };
   const shareOnX = () => { window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(currentUrl)}`, '_blank'); };
   const copyLink = () => { navigator.clipboard.writeText(currentUrl); alert('Enlace copiado al portapapeles.'); };
-
-  // --- HELPER ---
-  const renderEvidenceCard = (
-    data: string | EvidenceData | undefined, 
-    label: string, 
-    Icon: React.ElementType
-  ) => {
-    if (!data) return null;
-
-    const url = typeof data === 'string' ? data : data.url;
-    const date = typeof data !== 'string' ? data.uploadedAt : null;
-    const author = typeof data !== 'string' ? data.uploadedBy : null;
-
-    return (
-      <a href={url} className={styles.evidenceCard} target="_blank" rel="noreferrer">
-        <Icon className={styles.evidenceIcon} />
-        <span className={styles.evidenceTitle}>{label}</span>
-        
-        {/* Renderizado de Metadatos */}
-        {(date || author) && (
-          <div className={styles.evidenceMeta}>
-            {date && <span className={styles.metaDate}>Subido: {date}</span>}
-            {author && <span className={styles.metaAuthor}>Resp: {author}</span>}
-          </div>
-        )}
-      </a>
-    );
-  };
 
   return (
     <div className={styles.pageContainer}>
@@ -118,9 +156,12 @@ const EventDetail = () => {
 
       {/* HEADER */}
       <header className={styles.header}>
-        <span className={`${styles.statusBadge} ${styles[event.status]}`}>
-          {event.status === 'lleno' ? 'Cupo Lleno' : event.status}
-        </span>
+        {event.status && (
+            <span className={`${styles.statusBadge} ${styles[event.status.toLowerCase()]}`}>
+            {event.status === 'lleno' ? 'Cupo Lleno' : event.status}
+            </span>
+        )}
+
         <h1 className={styles.title}>{event.title}</h1>
         
         <div className={styles.metaGrid}>
@@ -128,7 +169,10 @@ const EventDetail = () => {
             <FaCalendarAlt className={styles.metaIcon} />
             <div>
               <strong>Fecha y Hora</strong><br/>
-              {event.date} • {event.time}
+              <p>
+                {formatDate(event.date)} <br/> 
+                {formatTimeRange(event.start_time, event.end_time)}
+              </p>
             </div>
           </div>
           <div className={styles.metaItem}>
@@ -143,7 +187,7 @@ const EventDetail = () => {
             <FaUsers className={styles.metaIcon} />
             <div>
               <strong>Organiza</strong><br/>
-              {event.organizers?.join(', ') || 'Comité PMDU'}
+              Comité PMDU
             </div>
           </div>
         </div>
@@ -185,7 +229,7 @@ const EventDetail = () => {
         <p>{event.description}</p>
       </div>
 
-      {event.agenda && (
+      {/*{event.agenda && (
         <div className={styles.section}>
           <h3 className={styles.sectionTitle}>Agenda del día</h3>
           <ul className={styles.agendaList}>
@@ -200,7 +244,7 @@ const EventDetail = () => {
             })}
           </ul>
         </div>
-      )}
+      )}*/}
 
       {/* LÓGICA CONDICIONAL: REGISTRO O EVIDENCIAS */}
       
@@ -218,7 +262,7 @@ const EventDetail = () => {
           </p>
           
           <div className={styles.evidenceGrid}>
-            {/* Usamos el helper para renderizar cada tipo con sus metadatos */}
+            
             {renderEvidenceCard(event.evidence.reportUrl, 'Minuta / Reporte', FaFilePdf)}
             {renderEvidenceCard(event.evidence.presentationUrl, 'Presentación', FaFilePdf)}
             {renderEvidenceCard(event.evidence.attendanceUrl, 'Lista de Asistencia', FaClipboardList)}

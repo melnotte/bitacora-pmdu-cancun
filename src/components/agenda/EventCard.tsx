@@ -1,34 +1,52 @@
-import { type Event } from '../../types';
+import { type UIEvent } from '../../types';
 import { FaCalendarDay, FaMapMarkerAlt } from 'react-icons/fa';
 import styles from './EventCard.module.css';
 
 interface EventCardProps {
-  event: Event;
+  event: UIEvent;
   onClick: (id: string) => void;
 }
 
 const EventCard = ({ event, onClick }: EventCardProps) => {
-  const isPast = event.status === 'finalizado';
+  const statusClass = event.status ? styles[event.status.toLowerCase()] : '';
+  const modalityClass = event.modality ? styles[event.modality.toLowerCase()] : '';
 
   // Formatear fecha
-  const formatDate = (dateStr: string) => {
+  const formatDate = (dateStr: string | null) => {
+    if (!dateStr) return 'Fecha por definir';
+    
     const options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'long', year: 'numeric' };
-    return new Date(dateStr + 'T00:00:00').toLocaleDateString('es-MX', options);
+    return new Date(`${dateStr}T00:00:00`).toLocaleDateString('es-MX', options);
+  };
+
+  // Formatear rango de horas (Ej: "10:00 - 14:00 hrs" o "12:00 hrs")
+  const formatTimeRange = (start: string | null, end: string | null) => {
+    if (!start) return 'Hora por definir';
+    
+    const s = start.slice(0, 5);
+    if (!end) return `${s} hrs`;
+    
+    const e = end.slice(0, 5);
+    return `${s} - ${e} hrs`;
   };
 
   return (
     <article className={styles.card}>
       <div className={styles.header}>
         <div className={styles.badges}>
-          <span className={`${styles.badge} ${styles[event.modality.toLowerCase()]}`}>
-            {event.modality}
-          </span>
-          <span className={`${styles.badge} ${styles[event.status]}`}>
-            {event.status}
-          </span>
+          {event.modality && (
+            <span className={`${styles.badge} ${modalityClass}`}>
+              {event.modality}
+            </span>
+          )}
+          {event.status && (
+             <span className={`${styles.badge} ${statusClass}`}>
+              {event.status}
+            </span>
+          )}
         </div>
         <div className={styles.date}>
-          <FaCalendarDay /> {formatDate(event.date)} • {event.time}
+          <FaCalendarDay /> {formatDate(event.date)} • {formatTimeRange(event.start_time, event.end_time)}
         </div>
         <h3 className={styles.title}>{event.title}</h3>
       </div>
@@ -43,10 +61,10 @@ const EventCard = ({ event, onClick }: EventCardProps) => {
           {event.location}
         </div>
         <button 
-          onClick={() => onClick(event.id)}
-          className={`${styles.actionButton} ${event.status === 'lleno' ? styles.disabledButton : ''}`}
+          onClick={() => onClick(event.id.toString())} 
+          className={`${styles.actionButton} ${event.status === 'abierto' ? styles.register : styles.details}`}
         >
-          {isPast ? 'Ver Resultados' : 'Ver Detalles'}
+          {event.status === 'abierto' ? 'Registrarme' : 'Ver Detalles'}
         </button>
       </div>
     </article>

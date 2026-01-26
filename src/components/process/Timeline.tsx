@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import type { ProcessPhase } from '../../types';
 import styles from './Timeline.module.css';
@@ -95,9 +96,13 @@ const Timeline = () => {
 
                 {/* Eventos (Icono Calendario y Link a /participa) */}
                 {phase.events?.map((evt, idx) => (
-                  <a key={`evt-${idx}`} href={`/participa?event_id=${evt.id}`} className={styles.link}>
+                  <Link 
+                    key={`evt-${idx}`} 
+                    to={`/participa/${evt.id}`} 
+                    className={styles.link}
+                  >
                     <FaCalendarAlt /> {evt.title}
-                  </a>
+                  </Link>
                 ))}
               </div>
 

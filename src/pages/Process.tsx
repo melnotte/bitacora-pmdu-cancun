@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
-import type { InstrumentRow, RelatedLink } from '../types';
+import type { Instrument, RelatedLink } from '../types';
 import Timeline from '../components/process/Timeline';
 import NewsFeed from '../components/process/NewsFeed';
 import PageHeader from '../components/layout/PageHeader';
@@ -8,7 +8,7 @@ import { CurrentVersionCard } from '../components/process/CurrentVersionCard';
 
 const ProcessPage = () => {
 
-  const [instrument, setInstrument] = useState<InstrumentRow | null>(null);
+  const [instrument, setInstrument] = useState<Instrument | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -16,14 +16,20 @@ const ProcessPage = () => {
       try {
         const { data, error } = await supabase
           .from('official_instruments')
-          .select('*')
+          .select(`
+            *,
+            phase:process_phases (
+              title,
+              status
+            )
+          `)
           .eq('is_active', true)
           .single();
 
         if (error) {
            if (error.code !== 'PGRST116') console.error(error); 
         } else {
-          setInstrument(data);
+          setInstrument(data as unknown as Instrument);
         }
       } catch (err) {
         console.error('Error fetching instrument:', err);
@@ -64,7 +70,8 @@ const ProcessPage = () => {
              <CurrentVersionCard 
                 version={instrument.version || "N/A"}
                 date={instrument.publish_date || "Sin fecha"}
-                stage={instrument.status === 'vigente' ? 'Vigente' : 'En Aprobación'} 
+                status={instrument.status}
+                stage={instrument.phase?.title || 'Etapa Desconocida'}
                 responsible={instrument.responsible || "IMPLAN"}
                 summaryChanges={instrument.summary_changes || "Sin cambios registrados."}
                 downloadUrl={instrument.final_document_url || "#"}

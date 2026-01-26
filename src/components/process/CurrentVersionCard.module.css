@@ -37,6 +37,10 @@
   letter-spacing: 0.05em;
 }
 
+.badgeWarning {
+  background-color: #f59e0b; /* Color del status 'en_aprobacion' del instrumento */
+}
+
 .title {
   margin: 0;
   color: #1e293b;
