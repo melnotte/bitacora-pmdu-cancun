@@ -1,28 +1,49 @@
+import { useEffect, useState } from 'react';
+import { supabase } from '../../lib/supabase';
+import type { InstrumentRow } from '../../types';
 import styles from './OfficialInstrumentSection.module.css';
-import { FaFileSignature, FaNewspaper, FaBook, FaCalendarCheck } from 'react-icons/fa6';
+import { FaFileSignature, FaNewspaper, FaBook, FaCalendarCheck, FaClock } from 'react-icons/fa6';
 
-interface InstrumentData {
-  status: 'vigente' | 'en_aprobacion';
-  publishDate?: string;
-  effectiveDate?: string;
-  officialGazetteUrl?: string;
-  cabildoAgreementUrl?: string;
-  finalDocumentUrl?: string;
-}
 
 export const OfficialInstrumentSection = () => {
-  const data: InstrumentData = {
-    status: 'vigente', 
-    publishDate: '15 de Abril de 2024',
-    effectiveDate: '16 de Abril de 2024',
-    officialGazetteUrl: '#',
-    cabildoAgreementUrl: '#',
-    finalDocumentUrl: '/documentos/pmdu-borrador-v2.1.pdf'
+  const [instrument, setInstrument] = useState<InstrumentRow | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchInstrument = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('official_instruments')
+          .select('*')
+          .eq('is_active', true)
+          .single();
+
+        if (error) {
+          if (error.code !== 'PGRST116') console.error('Error fetching instrument:', error);
+          setInstrument(null);
+        } else {
+          setInstrument(data);
+        }
+      } catch (err) {
+        console.error('Error:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchInstrument();
+  }, []);
+
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return 'Pendiente';
+    return new Date(`${dateString}T12:00:00`).toLocaleDateString('es-MX', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
   };
 
-  if (data.status === 'en_aprobacion') {
-    return null;
-  }
+  if (loading || !instrument) return null;
 
   return (
     <section className={styles.section}>
@@ -31,14 +52,19 @@ export const OfficialInstrumentSection = () => {
         {/* Columna Izquierda */}
         <div className={styles.titleBlock}>
           <span className={styles.statusBadge}>
-            <FaCalendarCheck style={{ marginRight: '6px' }} />
-            Instrumento Vigente
+            {instrument.status === 'vigente' ? (
+              <><FaCalendarCheck style={{ marginRight: '6px' }} /> Instrumento Vigente</>
+            ) : (
+              <><FaClock style={{ marginRight: '6px' }} /> En Aprobación</>
+            )}
           </span>
-          <h2>Programa Municipal de Desarrollo Urbano (2024-2040)</h2>
+
+          <h2>{instrument.title}</h2>
           <p className={styles.description}>
-            Este instrumento ha cumplido con todos los procesos legales y administrativos. 
-            Es la norma oficial vigente para la regulación del ordenamiento territorial 
-            en el municipio de Benito Juárez.
+            Esta versión técnica cuenta con la validación preliminar del Consejo Consultivo. 
+            Se pone a disposición de la ciudadanía como base para la Consulta Pública, 
+            garantizando que el documento final integre tanto el rigor técnico como la 
+            visión de los habitantes.
           </p>
         </div>
 
@@ -48,29 +74,35 @@ export const OfficialInstrumentSection = () => {
           <div className={styles.datesGrid}>
             <div className={styles.dateItem}>
               <label>Publicación Oficial</label>
-              <span>{data.publishDate}</span>
+              <span>{formatDate(instrument.publish_date)}</span>
             </div>
             <div className={styles.dateItem}>
               <label>Entrada en Vigor</label>
-              <span>{data.effectiveDate}</span>
+              <span>{formatDate(instrument.effective_date)}</span>
             </div>
           </div>
 
           <div className={styles.linksStack}>
-            <a href={data.cabildoAgreementUrl} className={styles.legalLink} target="_blank" rel="noreferrer">
-              <FaFileSignature className={styles.icon} />
-              <span>Dictamen de Cabildo</span>
-            </a>
+            {instrument.cabildo_agreement_url && (
+              <a href={instrument.cabildo_agreement_url} className={styles.legalLink} target="_blank" rel="noreferrer">
+                <FaFileSignature className={styles.icon} />
+                <span>Dictamen de Cabildo</span>
+              </a>
+            )}
 
-            <a href={data.officialGazetteUrl} className={styles.legalLink} target="_blank" rel="noreferrer">
-              <FaNewspaper className={styles.icon} />
-              <span>Publicación en Órgano Oficial</span>
-            </a>
+            {instrument.official_gazette_url && (
+              <a href={instrument.official_gazette_url} className={styles.legalLink} target="_blank" rel="noreferrer">
+                <FaNewspaper className={styles.icon} />
+                <span>Publicación en Órgano Oficial</span>
+              </a>
+            )}
 
-            <a href={data.finalDocumentUrl} className={styles.legalLink} target="_blank" rel="noreferrer">
-              <FaBook className={styles.icon} />
-              <span>Consultar Instrumento Final</span>
-            </a>
+            {instrument.final_document_url && (
+              <a href={instrument.final_document_url} className={styles.legalLink} target="_blank" rel="noreferrer">
+                <FaBook className={styles.icon} />
+                <span>Consultar Instrumento Final</span>
+              </a>
+            )}
           </div>
 
         </div>

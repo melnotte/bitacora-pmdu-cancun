@@ -19,11 +19,17 @@
   }
 }
 
+.titleBlock {
+  display: flex;
+  flex-direction: column;
+}
+
 .titleBlock h2 {
   font-size: 1.8rem;
   color: #0f172a;
   margin-bottom: 1rem;
   font-weight: 700;
+  line-height: 1.2;
 }
 
 .statusBadge {
@@ -36,6 +42,7 @@
   font-weight: 600;
   margin-bottom: 1rem;
   border: 1px solid #bbf7d0;
+  width: fit-content;
 }
 
 .description {
@@ -43,6 +50,7 @@
   line-height: 1.6;
   font-size: 1.05rem;
   margin-bottom: 1.5rem;
+  text-align: justify;
 }
 
 .legalCard {
@@ -60,6 +68,11 @@
   margin-bottom: 1.5rem;
   padding-bottom: 1.5rem;
   border-bottom: 1px solid #f1f5f9;
+}
+
+.dateItem {
+  display: flex;
+  flex-direction: column;
 }
 
 .dateItem label {
