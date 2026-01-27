@@ -49,7 +49,7 @@ const NewsFeed = () => {
         setPosts(postsData as unknown as Post[] || []);
 
       } catch (err) {
-        console.error('Error cargando datos:', err);
+        console.error('Error cargando noticias:', err);
       } finally {
         setLoading(false);
       }
