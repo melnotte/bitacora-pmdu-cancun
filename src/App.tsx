@@ -9,6 +9,7 @@ import Transparency from './pages/Transparency';
 import DocumentsPage from './pages/Documents';
 import PageHeader from './components/layout/PageHeader';
 import Maps from './pages/Maps';
+import PostDetail from './pages/PostDetail';
 
 // Placeholder
 const PlaceholderPage = ({ title }: { title: string }) => (
@@ -28,6 +29,7 @@ function App() {
           <Route index element={<Home />} />
           <Route path="consulta" element={<Consultation />} />
           <Route path="proceso" element={<ProcessPage />} />
+          <Route path="proceso/post/:id" element={<PostDetail />} /> {/*RUTA DINÁMICA*/}
           <Route path="participa" element={<ParticipationPage />} />
           <Route path="participa/:id" element={<EventDetail />} /> {/*RUTA DINÁMICA*/}
           <Route path="mapas" element={<Maps />} />

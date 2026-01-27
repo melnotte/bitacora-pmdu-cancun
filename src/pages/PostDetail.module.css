@@ -1,0 +1,103 @@
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.backButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+  color: #666;
+  padding: 0;
+  transition: color 0.2s;
+}
+
+.backButton:hover {
+  color: #005eb8;
+}
+
+.title {
+  font-size: 2rem;
+  color: #111;
+  margin-bottom: 0.5rem;
+  line-height: 1.2;
+}
+
+.date {
+  color: #888;
+  margin-bottom: 2rem;
+  font-size: 0.95rem;
+  display: block;
+}
+
+.mainImage {
+  width: 100%;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.content {
+  line-height: 1.8;
+  font-size: 1.1rem;
+  color: #333;
+  white-space: pre-wrap;
+}
+
+/* Sección de Recursos Relacionados */
+.relatedSection {
+  margin-top: 3rem;
+  padding: 25px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border: 1px solid #eee;
+}
+
+.relatedTitle {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 1.2rem;
+  color: #444;
+}
+
+.relatedButtons {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+/* Botones compartidos */
+.actionBtn {
+  padding: 12px 20px;
+  cursor: pointer;
+  border: none;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.actionBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Variantes de color */
+.eventBtn {
+  background-color: #e0f2fe;
+  color: #0284c7;
+}
+
+.docBtn {
+  background-color: #fef3c7;
+  color: #d97706;
+}

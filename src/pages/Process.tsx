@@ -90,10 +90,11 @@ const ProcessPage = () => {
         <section style={{ marginBottom: '5rem' }}>
           <Timeline />
         </section>
+      </div>
 
-        <section style={{ marginBottom: '5rem' }}>
-          <NewsFeed />
-        </section>
+      {/* SECCIÓN BITÁCORA DE ACTUALIZACIONES */}
+      <div style={{ maxWidth: '1600px', margin: '0 auto', padding: '0 20px', marginBottom: '5rem' }}>
+         <NewsFeed />
       </div>
     </div>
   );

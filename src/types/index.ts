@@ -74,3 +74,18 @@ export interface UIEvent extends Omit<EventRow, 'evidence' | 'time'> {
   end_time: string | null; // Puede ser null
 }
 
+// --- TIPOS DE ACTUALIZACIONES ---
+export interface PostCategory {
+  id: number;
+  name: string;
+  color?: string;
+}
+
+export interface Post extends PostRow {
+  post_categories: {
+    name: string;
+    color?: string;
+  } | null;
+  linked_event_id: string | null;
+  linked_document_id: string | null;
+}
