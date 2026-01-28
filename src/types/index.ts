@@ -6,6 +6,8 @@ export type DocumentRow = Database['public']['Tables']['documents']['Row'];
 export type EventRow = Database['public']['Tables']['events']['Row'];
 export type PostRow = Database['public']['Tables']['posts']['Row']; 
 export type InstrumentRow = Database['public']['Tables']['official_instruments']['Row'];
+export type PollRow = Database['public']['Tables']['weekly_polls']['Row'];
+export type PollOptionRow = Database['public']['Tables']['poll_options']['Row'];
 
 // --- TIPOS EXTENDIDOS O DE AYUDA ---
 
@@ -88,4 +90,9 @@ export interface Post extends PostRow {
   } | null;
   linked_event_id: string | null;
   linked_document_id: string | null;
+}
+
+// --- ENCUESTAS ---
+export interface WeeklyPollWithDetails extends PollRow {
+  poll_options: PollOptionRow[];
 }
