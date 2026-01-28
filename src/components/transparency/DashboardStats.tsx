@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
+import { supabase } from '../../lib/supabase';
+import type { WeeklyPollWithDetails } from '../../types';
 import { type Comment } from '../../data/commentsData';
-import { getPollResults, type Poll, currentPollData } from '../../data/pollData';
 import styles from './DashboardStats.module.css';
 
 interface DashboardStatsProps {
@@ -10,12 +11,39 @@ interface DashboardStatsProps {
 export const DashboardStats: React.FC<DashboardStatsProps> = ({ comments = [] }) => {
   
   // Estado para la encuesta
-  const [pollData, setPollData] = useState<Poll>(currentPollData);
+  const [poll, setPoll] = useState<WeeklyPollWithDetails | null>(null);
+  const [loadingPoll, setLoadingPoll] = useState(true);
 
   useEffect(() => {
-    // Simula fetch al backend
-    const data = getPollResults(currentPollData.id);
-    setPollData(data);
+    const fetchPollStats = async () => {
+      try {
+        setLoadingPoll(true);
+        
+        const { data, error } = await supabase
+          .from('weekly_polls')
+          .select('*, poll_options(*)')
+          .eq('is_active', true)
+          .single();
+
+        if (error) throw error;
+
+        if (data) {
+          data.poll_options.sort((a, b) => {
+            if (a.is_open_response) return 1;
+            if (b.is_open_response) return -1;
+            return (b.votes || 0) - (a.votes || 0); 
+          });
+
+          setPoll(data as WeeklyPollWithDetails);
+        }
+      } catch (err) {
+        console.error('Error cargando estadísticas de encuesta:', err);
+      } finally {
+        setLoadingPoll(false);
+      }
+    };
+
+    fetchPollStats();
   }, []);
   
   // --- CÁLCULOS DINÁMICOS ---
@@ -77,6 +105,12 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({ comments = [] })
         { week: 'Actual', count: Math.floor(comments.length * 0.15), height: '20%' },
     ];
   }, [comments.length]);
+
+  // Total de Votos de la Encuesta
+  const totalVotes = useMemo(() => {
+    if (!poll) return 0;
+    return poll.poll_options.reduce((sum, opt) => sum + (opt.votes || 0), 0);
+  }, [poll]);
 
 
   return (
@@ -146,30 +180,47 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({ comments = [] })
         {/* SECCIÓN ENCUESTA SEMANAL */}
         <div className={`${styles.chartSection} ${styles.fullWidthChart}`}>
             <h4 className={styles.chartTitle}>Resultados: Pregunta de la Semana</h4>
-            <p className="text-sm text-gray-500 mb-4">{pollData.question}</p>
             
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                {pollData.options.map(opt => {
-                    const pct = pollData.totalVotes > 0 
-                        ? Math.round((opt.votes / pollData.totalVotes) * 100) 
-                        : 0;
+            {loadingPoll && <p className="text-sm text-gray-400 text-center py-4">Cargando...</p>}
+            
+            {!loadingPoll && !poll && <p className="text-sm text-gray-400 text-center py-4">No hay datos disponibles</p>}
+
+            {!loadingPoll && poll && (
+                <>
+                    <p className={styles.pollQuestion}>{poll.question}</p>
+
+                    <div className={styles.pollResultsList}>
+                        {poll.poll_options.map(opt => {
+                            const votes = opt.votes || 0;
+                            const pct = totalVotes > 0 
+                                ? Math.round((votes / totalVotes) * 100) 
+                                : 0;
+                            
+                            return (
+                                <div key={opt.id} className={styles.pollOptionWrapper}>
+                                    {/* Texto e info */}
+                                    <div className={styles.pollOptionHeader}>
+                                        <span className={styles.pollOptionLabel}>{opt.label}</span>
+                                        <span className={styles.pollOptionValue}>{pct}% ({votes})</span>
+                                    </div>
+                                    
+                                    {/* Barra de Progreso */}
+                                    <div className={styles.pollBarBackground}>
+                                        <div 
+                                          className={styles.pollBarFill} 
+                                          style={{ width: `${pct}%` }} 
+                                        ></div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
                     
-                    return (
-                        <div key={opt.id}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', marginBottom: '4px' }}>
-                                <span>{opt.label}</span>
-                                <span style={{ fontWeight: 'bold' }}>{pct}% ({opt.votes})</span>
-                            </div>
-                            <div style={{ width: '100%', backgroundColor: '#e5e7eb', borderRadius: '4px', height: '10px', overflow: 'hidden' }}>
-                                <div style={{ width: `${pct}%`, backgroundColor: '#005eb8', height: '100%' }}></div>
-                            </div>
-                        </div>
-                    );
-                })}
-            </div>
-            <p className="text-xs text-center text-gray-400 mt-4">
-                Total de votos: {pollData.totalVotes}
-            </p>
+                    <p className={styles.pollTotal}>
+                        Total de votos: {totalVotes}
+                    </p>
+                </>
+            )}
         </div>
 
       </div>
