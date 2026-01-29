@@ -10,6 +10,7 @@ export type PollRow = Database['public']['Tables']['weekly_polls']['Row'];
 export type PollOptionRow = Database['public']['Tables']['poll_options']['Row'];
 export type ChapterRow = Database['public']['Tables']['consultation_chapters']['Row'];
 export type CommentRow = Database['public']['Tables']['comments']['Row'];
+export type CommentStatus = 'received' | 'pending' | 'analyzing' | 'integrated' | 'rejected' | 'not_applicable' | 'duplicate';
 
 // --- TIPOS EXTENDIDOS O DE AYUDA ---
 
@@ -110,4 +111,8 @@ export interface WeeklyStat {
   week: string;
   count: number;
   height: string;
+  tooltip?: string;
+  isCurrentMonth?: boolean;
 }
+
+

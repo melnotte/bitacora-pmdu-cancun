@@ -1,10 +1,9 @@
-import { useState, useMemo, useEffect } from 'react'; // Agregamos useEffect
-import { type Comment, type CommentStatus } from '../../data/commentsData';
+import { useState, useMemo, useEffect } from 'react';
 import { FaDownload, FaSave, FaSearch, FaFilter, FaChevronLeft, FaChevronRight } from 'react-icons/fa'; // Iconos nuevos
 import styles from './ModerationPanel.module.css';
-
+import type { CommentRow, CommentStatus } from '../../types';
 interface ModerationPanelProps {
-  comments: Comment[];
+  comments: CommentRow[]; 
   onUpdateComment: (id: string, newStatus: CommentStatus, newNote: string) => void;
 }
 
@@ -21,7 +20,7 @@ const ModerationPanel = ({ comments, onUpdateComment }: ModerationPanelProps) =>
   // --- ESTADO DE PAGINACIÓN ---
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Estados de edición
+  // --- ESTADO DE EDICIÓN ---
   const [editingId, setEditingId] = useState<string | null>(null);
   const [tempNote, setTempNote] = useState('');
 
@@ -41,14 +40,14 @@ const ModerationPanel = ({ comments, onUpdateComment }: ModerationPanelProps) =>
     return comments.filter(c => {
       const matchesSearch = 
         searchText === '' ||
-        c.folio.toLowerCase().includes(searchText.toLowerCase()) ||
+        (c.folio?.toLowerCase().includes(searchText.toLowerCase())) ||
         c.topic.toLowerCase().includes(searchText.toLowerCase()) ||
         c.content.toLowerCase().includes(searchText.toLowerCase());
 
       const matchesTopic = filterTopic === 'Todos' || c.topic === filterTopic;
       const matchesStatus = filterStatus === 'Todos' || c.status === filterStatus;
 
-      const cDate = new Date(c.date);
+      const cDate = new Date(c.created_at || '');
       const matchesDateStart = !dateStart || cDate >= new Date(dateStart);
       const matchesDateEnd = !dateEnd || cDate <= new Date(dateEnd);
 
@@ -67,13 +66,13 @@ const ModerationPanel = ({ comments, onUpdateComment }: ModerationPanelProps) =>
   const handleStatusChange = (id: string, newStatus: string) => {
     const current = comments.find(c => c.id === id);
     if (current) {
-      onUpdateComment(id, newStatus as CommentStatus, current.internalNote);
+      onUpdateComment(id, newStatus as CommentStatus, current.internal_note || '');
     }
   };
 
-  const startEditingNote = (comment: Comment) => {
+  const startEditingNote = (comment: CommentRow) => {
     setEditingId(comment.id);
-    setTempNote(comment.internalNote);
+    setTempNote(comment.internal_note || '');
   };
 
   const saveNote = (id: string, currentStatus: CommentStatus) => {
@@ -95,7 +94,15 @@ const ModerationPanel = ({ comments, onUpdateComment }: ModerationPanelProps) =>
     const csvContent = [
       headers.join(','),
       ...filteredData.map(c => 
-        [c.folio, c.date, c.topic, c.zone, `"${c.content.replace(/"/g, '""')}"`, c.status, `"${c.internalNote}"`].join(',')
+        [
+            c.folio, 
+            new Date(c.created_at || '').toLocaleDateString(), 
+            c.topic, 
+            c.zone, 
+            `"${c.content.replace(/"/g, '""')}"`, 
+            c.status, 
+            `"${c.internal_note || ''}"`
+        ].join(',')
       )
     ].join('\n');
 
@@ -109,12 +116,14 @@ const ModerationPanel = ({ comments, onUpdateComment }: ModerationPanelProps) =>
     document.body.removeChild(link);
   };
 
-  const getStatusClass = (status: CommentStatus) => {
+  const getStatusClass = (status: string | null) => {
     switch(status) {
-      case 'Recibido': return styles.statusRecibido;
-      case 'En análisis': return styles.statusAnalisis;
-      case 'Atendido/Integrado': return styles.statusIntegrado;
-      case 'No procedente': return styles.statusNoProcedente;
+      case 'received':
+      case 'pending': return styles.statusRecibido;
+      case 'analyzing': return styles.statusAnalisis;
+      case 'integrated': return styles.statusIntegrado;
+      case 'rejected':
+      case 'not_applicable': return styles.statusNoProcedente;
       default: return styles.statusDuplicado;
     }
   };
@@ -155,11 +164,11 @@ const ModerationPanel = ({ comments, onUpdateComment }: ModerationPanelProps) =>
           <label className={styles.filterLabel}>Estatus</label>
           <select className={styles.filterSelect} value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
             <option value="Todos">Todos</option>
-            <option value="Recibido">Recibido</option>
-            <option value="En análisis">En análisis</option>
-            <option value="Atendido/Integrado">Integrado</option>
-            <option value="No procedente">No procedente</option>
-            <option value="Duplicado">Duplicado</option>
+            <option value="received">Recibido</option>
+            <option value="analyzing">En análisis</option>
+            <option value="integrated">Integrado</option>
+            <option value="not_applicable">No procedente</option>
+            <option value="duplicate">Duplicado</option>
           </select>
         </div>
         <div className={styles.filterGroup}>
@@ -190,7 +199,9 @@ const ModerationPanel = ({ comments, onUpdateComment }: ModerationPanelProps) =>
               <tr key={comment.id}>
                 <td>
                   <span className={styles.colFolio}>{comment.folio}</span>
-                  <span className={styles.dateSub}>{comment.date}</span>
+                  <span className={styles.dateSub}>
+                    {new Date(comment.created_at || '').toLocaleDateString()}
+                  </span>
                 </td>
                 <td>
                   <span className={styles.topicMain}>{comment.topic}</span>
@@ -201,15 +212,15 @@ const ModerationPanel = ({ comments, onUpdateComment }: ModerationPanelProps) =>
                 </td>
                 <td>
                   <select 
-                    value={comment.status}
+                    value={comment.status || 'received'}
                     onChange={(e) => handleStatusChange(comment.id, e.target.value)}
-                    className={`${styles.statusSelect} ${getStatusClass(comment.status)}`}
+                    className={`${styles.statusSelect} ${getStatusClass(comment.status || 'received')}`}
                   >
-                    <option value="Recibido">Recibido</option>
-                    <option value="En análisis">En análisis</option>
-                    <option value="Atendido/Integrado">Integrado</option>
-                    <option value="No procedente">No procedente</option>
-                    <option value="Duplicado">Duplicado</option>
+                    <option value="received">Recibido</option>
+                    <option value="analyzing">En análisis</option>
+                    <option value="integrated">Integrado</option>
+                    <option value="not_applicable">No procedente</option>
+                    <option value="duplicate">Duplicado</option>
                   </select>
                 </td>
                 <td>
@@ -222,14 +233,14 @@ const ModerationPanel = ({ comments, onUpdateComment }: ModerationPanelProps) =>
                         onChange={(e) => setTempNote(e.target.value)}
                         autoFocus
                       />
-                      <button onClick={() => saveNote(comment.id, comment.status)} className={styles.saveNoteBtn}>
+                      <button onClick={() => saveNote(comment.id, (comment.status as CommentStatus) || 'received')} className={styles.saveNoteBtn}>
                         <FaSave size={16} />
                       </button>
                     </div>
                   ) : (
                     <div onClick={() => startEditingNote(comment)} className={styles.noteDisplay}>
-                      {comment.internalNote ? (
-                        <span className={styles.noteText}>{comment.internalNote}</span>
+                      {comment.internal_note ? (
+                        <span className={styles.noteText}>{comment.internal_note}</span>
                       ) : (
                         <span className={styles.notePlaceholder}>Clic para agregar nota...</span>
                       )}

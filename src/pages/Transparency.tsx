@@ -1,52 +1,63 @@
 import { useState, useEffect } from 'react';
+import { supabase } from '../lib/supabase';
 import { DashboardStats } from '../components/transparency/DashboardStats';
 import ModerationPanel from '../components/transparency/ModerationPanel';
 import PageHeader from '../components/layout/PageHeader';
-import { initialComments, type Comment, type CommentStatus } from '../data/commentsData';
 import { FaUserShield, FaChartPie, FaListAlt } from 'react-icons/fa';
 import styles from './Transparency.module.css';
+import type { CommentRow, CommentStatus } from '../types';
 
 const Transparency = () => {
   // --- ESTADOS ---
-  // Inicializamos con los datos dummy
-  const [comments, setComments] = useState<Comment[]>(initialComments);
+  const [comments, setComments] = useState<CommentRow[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
   const [activeTab, setActiveTab] = useState<'dashboard' | 'moderation'>('dashboard');
+  const [loading, setLoading] = useState(true);
 
-  // --- EFECTO PARA CARGAR DATOS DEL FORMULARIO ---
-  useEffect(() => {
-    // 1. Intentar leer del LocalStorage
-    const storedData = localStorage.getItem('pmdu_demo_comments');
-    
-    if (storedData) {
-      try {
-        const userComments: Comment[] = JSON.parse(storedData);
-        
-        // 2. Actualizar el estado combinando los nuevos con los existentes
-        setComments(prevDocs => {
-          // Creamos un Set de IDs existentes para evitar duplicados visuales
-          const existingIds = new Set(prevDocs.map(c => c.id));
-          
-          // Filtramos solo los que no estén en la lista
-          const newUnique = userComments.filter(c => !existingIds.has(c.id));
-          
-          // Retornamos datos dummy
-          return [...newUnique, ...prevDocs];
-        });
+  // --- Fetch de comentarios ---
+  const fetchComments = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('comments')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-      } catch (error) {
-        console.error("Error al cargar comentarios locales:", error);
-      }
+      if (error) throw error;
+      if (data) setComments(data as CommentRow[]);
+    } catch (error) {
+      console.error("Error al cargar comentarios:", error);
+    } finally {
+      setLoading(false);
     }
+  };
+
+  useEffect(() => {
+    fetchComments();
   }, []);
 
   // --- HANDLERS ---
-  const handleUpdateComment = (id: string, newStatus: CommentStatus, newNote: string) => {
-    setComments(prev => prev.map(c => 
-      c.id === id 
-        ? { ...c, status: newStatus, internalNote: newNote } 
-        : c
-    ));
+  const handleUpdateComment = async (id: string, newStatus: CommentStatus, newNote: string) => {
+    try {
+      const { error } = await supabase
+        .from('comments')
+        .update({ 
+          status: newStatus, 
+          internal_note: newNote
+        })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setComments(prev => prev.map(c => 
+        c.id === id 
+          ? { ...c, status: newStatus, internal_note: newNote } 
+          : c
+      ));
+    } catch (error) {
+      console.error("Error al actualizar comentario:", error);
+      alert("Error al guardar los cambios.");
+    }
   };
 
   const handleToggleAdmin = () => {
@@ -97,19 +108,24 @@ const Transparency = () => {
       )}
 
       {/* --- CONTENIDO --- */}
-      {activeTab === 'dashboard' ? (
-        // El Dashboard ahora recibirá 'comments' que incluye los nuevos datos
-        <DashboardStats comments={comments} />
+      {loading ? (
+        <div style={{ textAlign: 'center', padding: '2rem', color: '#666' }}>
+          Cargando datos de transparencia...
+        </div>
       ) : (
-        isAdmin && (
-          // En el Panel de Moderación también se verán los nuevos datos
-          <ModerationPanel 
-            comments={comments} 
-            onUpdateComment={handleUpdateComment} 
-          />
-        )
+        <>
+          {activeTab === 'dashboard' ? (
+            <DashboardStats comments={comments} />
+          ) : (
+            isAdmin && (
+              <ModerationPanel 
+                comments={comments} 
+                onUpdateComment={handleUpdateComment} 
+              />
+            )
+          )}
+        </>
       )}
-
     </div>
   );
 };

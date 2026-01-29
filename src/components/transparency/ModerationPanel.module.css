@@ -138,6 +138,7 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
   max-width: 300px;
+  line-clamp: 3;
 }
 
 /* Select de Estatus */
@@ -332,4 +333,36 @@
   font-size: 0.875rem;
   color: #4b5563;
   font-weight: 500;
+}
+
+
+/* Estilos del selector */
+.statusSelect option {
+  padding: 10px;
+  font-weight: 600;
+}
+
+.statusSelect option[value="received"] {
+  background-color: #eff6ff !important;
+  color: #2563eb !important;
+}
+
+.statusSelect option[value="analyzing"] {
+  background-color: #fffbeb !important;
+  color: #d97706 !important;
+}
+
+.statusSelect option[value="integrated"] {
+  background-color: #ecfdf5 !important;
+  color: #059669 !important;
+}
+
+.statusSelect option[value="not_applicable"] {
+  background-color: #fef2f2 !important;
+  color: #dc2626 !important;
+}
+
+.statusSelect option[value="duplicate"] {
+  background-color: #f3f4f6 !important;
+  color: #4b5563 !important;
 }
