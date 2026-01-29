@@ -27,7 +27,7 @@
 }
 
 .navMenu {
-  display: grid;
+  display: flex;
   grid-template-columns: repeat(7, auto);
   grid-gap: 10px;
   list-style: none;
@@ -54,6 +54,35 @@
   font-size: 1.8rem;
   cursor: pointer;
   color: #333;
+}
+
+.adminIconLink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.adminIconLink:hover {
+  transform: scale(1.1);
+}
+
+.logoutBtn {
+  background: none;
+  border: none;
+  color: #333;
+  font-size: 1.2rem;
+  padding: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s ease;
+}
+
+.logoutBtn:hover {
+  color: #dc2626;
 }
 
 /* MEDIA QUERIES TABLETA Y MÓVIL */
@@ -87,5 +116,12 @@
 
   .mobileIcon {
     display: block;
+  }
+
+  .logoutBtn {
+    width: 100%;
+    justify-content: center;
+    padding: 2rem;
+    font-size: 1.5rem;
   }
 }

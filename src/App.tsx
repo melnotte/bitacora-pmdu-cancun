@@ -10,6 +10,7 @@ import DocumentsPage from './pages/Documents';
 import PageHeader from './components/layout/PageHeader';
 import Maps from './pages/Maps';
 import PostDetail from './pages/PostDetail';
+import Login from './pages/Login';
 
 // Placeholder
 const PlaceholderPage = ({ title }: { title: string }) => (
@@ -27,6 +28,7 @@ function App() {
       <Routes>
         <Route path="/" element={<MainLayout />}>
           <Route index element={<Home />} />
+          <Route path="login" element={<Login />} />
           <Route path="consulta" element={<Consultation />} />
           <Route path="proceso" element={<ProcessPage />} />
           <Route path="proceso/post/:id" element={<PostDetail />} /> {/*RUTA DINÁMICA*/}

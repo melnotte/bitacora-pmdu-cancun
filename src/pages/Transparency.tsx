@@ -3,16 +3,52 @@ import { supabase } from '../lib/supabase';
 import { DashboardStats } from '../components/transparency/DashboardStats';
 import ModerationPanel from '../components/transparency/ModerationPanel';
 import PageHeader from '../components/layout/PageHeader';
-import { FaUserShield, FaChartPie, FaListAlt } from 'react-icons/fa';
+import { FaChartPie, FaListAlt } from 'react-icons/fa';
 import styles from './Transparency.module.css';
 import type { CommentRow, CommentStatus } from '../types';
 
 const Transparency = () => {
   // --- ESTADOS ---
   const [comments, setComments] = useState<CommentRow[]>([]);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [activeTab, setActiveTab] = useState<'dashboard' | 'moderation'>('dashboard');
   const [loading, setLoading] = useState(true);
+  const [userRole, setUserRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Función para obtener el rol
+    const getUserRole = async (user: any) => {
+      if (user) {
+        const { data } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single();
+        setUserRole(data?.role || 'citizen');
+      } else {
+        setUserRole('citizen');
+      }
+    };
+
+    // Carga inicial
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      getUserRole(user);
+    });
+
+    // Escuchar cambios de sesión (Login/Logout)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        getUserRole(session.user);
+      } else {
+        setUserRole('citizen'); // Limpiar rol al cerrar sesión
+        setActiveTab('dashboard'); // Forzar regreso al dashboard público
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Solo admin y moderator ven el panel de gestión
+  const isStaff = userRole === 'admin' || userRole === 'moderator';
 
   // --- Fetch de comentarios ---
   const fetchComments = async () => {
@@ -60,33 +96,16 @@ const Transparency = () => {
     }
   };
 
-  const handleToggleAdmin = () => {
-    const newState = !isAdmin;
-    setIsAdmin(newState);
-    // Si desactivamos admin, forzamos volver al dashboard público
-    if (!newState) setActiveTab('dashboard');
-  };
-
   return (
     <div className={styles.container}>
       
       <PageHeader 
         title="Transparencia del Proceso" 
-        description="Monitor de participación ciudadana en tiempo real. Consulta las estadísticas globales o accede al panel de moderación." 
+        description="Monitor de participación ciudadana en tiempo real. Consulta las estadísticas globales." 
       />
 
-      {/* --- BARRA DE ACCIONES (Simulación Admin) --- */}
-      <div className={styles.adminBar}>
-        <button 
-          onClick={handleToggleAdmin}
-          className={`${styles.adminToggleBtn} ${isAdmin ? styles.adminActive : styles.adminInactive}`}
-        >
-          <FaUserShield /> {isAdmin ? 'Modo Admin: ACTIVO' : 'Simular Acceso Admin'}
-        </button>
-      </div>
-
-      {/* --- VISTA DE DASHBOARD Y GESTIÓN DE COMENTARIOS --- */}
-      {isAdmin && (
+      {/* --- Tabs sólo visibles para admin y moderador --- */}
+      {isStaff && (
         <div className={styles.tabs}>
           <button
             className={`${styles.tab} ${activeTab === 'dashboard' ? styles.active : ''}`}
@@ -117,7 +136,7 @@ const Transparency = () => {
           {activeTab === 'dashboard' ? (
             <DashboardStats comments={comments} />
           ) : (
-            isAdmin && (
+            isStaff && (
               <ModerationPanel 
                 comments={comments} 
                 onUpdateComment={handleUpdateComment} 
