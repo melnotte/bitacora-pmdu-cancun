@@ -6,7 +6,7 @@
 /* --- Grid de Tarjetas (Estatus) --- */
 .statsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 1.5rem;
   margin-bottom: 3rem;
 }
@@ -79,10 +79,21 @@
 .weeklyChart {
   display: flex;
   align-items: flex-end;
-  justify-content: space-between;
+  justify-content: center;
   height: 220px;
   padding-top: 1rem;
   width: 100%;
+  margin-top: 1rem;
+}
+
+.chartFooterText {
+  font-size: 1rem;
+  color: #4b5563;
+  font-weight: 500;
+  margin-top: 1rem;
+  text-align: center;
+  width: 100%;
+  font-style: italic;
 }
 
 .weekColumn {
@@ -104,6 +115,7 @@
   transition: all 0.3s ease;
   min-height: 6px;
   position: relative;
+  min-height: 4px;
 }
 
 .barVertical:hover {
@@ -230,3 +242,24 @@
   color: #9ca3af;
   margin-top: 1rem;
 }
+
+.loading {
+  text-align: center;
+  padding: 3rem;
+  color: #6b7280;
+}
+
+.statIcon {
+  font-size: 1.5rem;
+  color: #9ca3af;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.blueBorder .statIcon { color: #005eb8; opacity: 0.7; }
+.yellowBorder .statIcon { color: #f59e0b; opacity: 0.7; }
+.greenBorder .statIcon { color: #10b981; opacity: 0.7; }
+.redBorder .statIcon { color: #ef4444; opacity: 0.7; }
+.grayBorder .statIcon { color: #64748b; opacity: 0.7; }

@@ -1,86 +1,119 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
-import type { WeeklyPollWithDetails } from '../../types';
-import { type Comment } from '../../data/commentsData';
+import type { WeeklyPollWithDetails, CommentRow } from '../../types';
 import styles from './DashboardStats.module.css';
+import { 
+  FaInbox, 
+  FaClock, 
+  FaCheckCircle, 
+  FaExclamationCircle, 
+  FaCopy 
+} from 'react-icons/fa';
 
-interface DashboardStatsProps {
-  comments?: Comment[];
-}
+export const DashboardStats: React.FC = () => {
 
-export const DashboardStats: React.FC<DashboardStatsProps> = ({ comments = [] }) => {
-  
-  // Estado para la encuesta
   const [poll, setPoll] = useState<WeeklyPollWithDetails | null>(null);
-  const [loadingPoll, setLoadingPoll] = useState(true);
+  const [dbComments, setDbComments] = useState<CommentRow[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // --- LÓGICA DEL MES ---
+  const { currentMonthName, currentYear } = useMemo(() => {
+    const now = new Date();
+    const month = new Intl.DateTimeFormat('es-MX', { month: 'long' }).format(now);
+    return {
+      currentMonthName: month.charAt(0).toUpperCase() + month.slice(1),
+      currentYear: now.getFullYear()
+    };
+  }, []);
 
   useEffect(() => {
-    const fetchPollStats = async () => {
+    const fetchData = async () => {
       try {
-        setLoadingPoll(true);
+        setLoading(true);
         
-        const { data, error } = await supabase
+        // Fetch de la encuesta semanal activa
+        const pollPromise = supabase
           .from('weekly_polls')
           .select('*, poll_options(*)')
           .eq('is_active', true)
           .single();
 
-        if (error) throw error;
+        // Fetch de comentarios
+        const commentsPromise = supabase
+          .from('comments')
+          .select('*');
 
-        if (data) {
-          data.poll_options.sort((a, b) => {
+        const [pollRes, commentsRes] = await Promise.all([pollPromise, commentsPromise]);
+
+        if (pollRes.data) {
+          const sortedOptions = [...pollRes.data.poll_options].sort((a, b) => {
             if (a.is_open_response) return 1;
             if (b.is_open_response) return -1;
-            return (b.votes || 0) - (a.votes || 0); 
+            return (b.votes || 0) - (a.votes || 0);
           });
-
-          setPoll(data as WeeklyPollWithDetails);
+          setPoll({ ...pollRes.data, poll_options: sortedOptions } as WeeklyPollWithDetails);
         }
+
+        if (commentsRes.data) {
+          setDbComments(commentsRes.data as CommentRow[]);
+        }
+
       } catch (err) {
-        console.error('Error cargando estadísticas de encuesta:', err);
+        console.error("Error al sincronizar dashboard:", err);
       } finally {
-        setLoadingPoll(false);
+        setLoading(false);
       }
     };
 
-    fetchPollStats();
+    fetchData();
   }, []);
   
   // --- CÁLCULOS DINÁMICOS ---
-  
+
   // Totales por Estatus
-  const statusStats = useMemo(() => {
-    const counts = {
-      'Recibido': 0,
-      'En análisis': 0,
-      'Atendido/Integrado': 0,
-      'No procedente': 0,
-      'Duplicado': 0
-    };
-
-    comments.forEach(c => {
-      if (counts[c.status] !== undefined) {
-        counts[c.status]++;
-      }
-    });
-
+  const statsSummary = useMemo(() => {
     return [
-      { label: 'Recibido', value: counts['Recibido'], color: '#3B82F6' },
-      { label: 'En Análisis', value: counts['En análisis'], color: '#F59E0B' },
-      { label: 'Integrado', value: counts['Atendido/Integrado'], color: '#10B981' },
-      { label: 'No Procedente', value: counts['No procedente'], color: '#EF4444' },
-      { label: 'Duplicado', value: counts['Duplicado'], color: '#6B7280' },
+      { 
+        label: 'Recibido', 
+        value: dbComments.filter(c => c.status === 'pending' || c.status === 'received').length, 
+        icon: <FaInbox />, 
+        styleClass: styles.blueBorder 
+      },
+      { 
+        label: 'En Análisis', 
+        value: dbComments.filter(c => c.status === 'analyzing').length, 
+        icon: <FaClock />, 
+        styleClass: styles.yellowBorder 
+      },
+      { 
+        label: 'Integrado', 
+        value: dbComments.filter(c => c.status === 'integrated').length, 
+        icon: <FaCheckCircle />, 
+        styleClass: styles.greenBorder 
+      },
+      { 
+        label: 'No Procedente', 
+        value: dbComments.filter(c => c.status === 'rejected' || c.status === 'not_applicable').length, 
+        icon: <FaExclamationCircle />, 
+        styleClass: styles.redBorder 
+      },
+      { 
+        label: 'Duplicado', 
+        value: dbComments.filter(c => c.status === 'duplicate').length, 
+        icon: <FaCopy />, 
+        styleClass: styles.grayBorder 
+      },
     ];
-  }, [comments]);
+  }, [dbComments]);
 
   // Top temas más comentados
   const topicStats = useMemo(() => {
     const topicMap: Record<string, number> = {};
-    comments.forEach(c => {
-      topicMap[c.topic] = (topicMap[c.topic] || 0) + 1;
+    dbComments.forEach(c => {
+      if (c.topic) topicMap[c.topic] = (topicMap[c.topic] || 0) + 1;
     });
 
-    const total = comments.length || 1;
+    const total = dbComments.length || 1;
     
     return Object.entries(topicMap)
       .sort(([, a], [, b]) => b - a)
@@ -90,21 +123,43 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({ comments = [] })
         count,
         pct: `${Math.round((count / total) * 100)}%`
       }));
-  }, [comments]);
+  }, [dbComments]);
 
-  // Simulación de Por Semana
+  // Actividad de las últimas 4 semanas
   const weeklyStats = useMemo(() => {
-    if (comments.length === 0) return [];
-    
-    // Mock visual basado en el total
-    return [
-        { week: 'Sem 1', count: Math.floor(comments.length * 0.1), height: '10%' },
-        { week: 'Sem 2', count: Math.floor(comments.length * 0.2), height: '30%' },
-        { week: 'Sem 3', count: Math.floor(comments.length * 0.4), height: '50%' },
-        { week: 'Sem 4', count: Math.floor(comments.length * 0.15), height: '20%' },
-        { week: 'Actual', count: Math.floor(comments.length * 0.15), height: '20%' },
-    ];
-  }, [comments.length]);
+    const now = new Date();
+    const weeksData = [];
+
+    for (let i = 3; i >= 0; i--) {
+      const startOfWeek = new Date(now);
+      startOfWeek.setDate(now.getDate() - (i * 7 + 6));
+      const endOfWeek = new Date(now);
+      endOfWeek.setDate(now.getDate() - (i * 7));
+
+      const count = dbComments.filter(c => {
+        const cDate = new Date(c.created_at || '');
+        return cDate >= startOfWeek && cDate <= endOfWeek;
+      }).length;
+
+      // Nombre del mes para el tooltip
+      const monthName = new Intl.DateTimeFormat('es-MX', { month: 'short' }).format(endOfWeek);
+      const dayRange = `${startOfWeek.getDate()} - ${endOfWeek.getDate()} ${monthName}`;
+
+      weeksData.push({
+        label: i === 0 ? 'Semana Actual' : `Hace ${i} sem.`,
+        tooltip: `${count} comentarios (${dayRange})`,
+        count,
+        isCurrentMonth: endOfWeek.getMonth() === now.getMonth()
+      });
+    }
+
+    const maxCount = Math.max(...weeksData.map(w => w.count)) || 1;
+
+    return weeksData.map(w => ({
+      ...w,
+      height: w.count > 0 ? `${(w.count / maxCount) * 100}%` : '5%'
+    }));
+  }, [dbComments]);
 
   // Total de Votos de la Encuesta
   const totalVotes = useMemo(() => {
@@ -112,18 +167,16 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({ comments = [] })
     return poll.poll_options.reduce((sum, opt) => sum + (opt.votes || 0), 0);
   }, [poll]);
 
+  if (loading) return <div className={styles.loading}>Cargando métricas en tiempo real...</div>;
 
   return (
     <div className={styles.container}>
       
       {/* SECCIÓN TOTALES POR ESTATUS */}
       <div className={styles.statsGrid}>
-        {statusStats.map((stat) => (
-          <div 
-            key={stat.label} 
-            className={styles.statCard} 
-            style={{ borderLeftColor: stat.color }}
-          >
+        {statsSummary.map((stat) => (
+          <div key={stat.label} className={`${styles.statCard} ${stat.styleClass}`}>
+            <div className={styles.statIcon}>{stat.icon}</div>            
             <span className={styles.statLabel}>{stat.label}</span>
             <span className={styles.statValue}>{stat.value}</span>
           </div>
@@ -134,22 +187,28 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({ comments = [] })
         
         {/* SECCIÓN EVOLUCIÓN POR SEMANA */}
         <div className={styles.chartSection}>
-          <h4 className={styles.chartTitle}>Actividad Reciente</h4>
+          <h4 className={styles.chartTitle}>Participación Ciudadana: {currentMonthName} {currentYear}</h4>
           <div className={styles.weeklyChart}>
-            {weeklyStats.map((item,nV) => (
-              <div key={nV} className={styles.weekColumn}>
+            {weeklyStats.map((item, idx) => (
+              <div key={idx} className={styles.weekColumn}>
                 <div 
-                    className={styles.barVertical} 
-                    style={{ height: item.height || '10%' }}
+                  className={styles.barVertical} 
+                  style={{ 
+                    height: item.height,
+                    opacity: item.isCurrentMonth ? 1 : 0.6 
+                  }}
                 >
-                    <span className={styles.barTooltip}>{item.count}</span>
+                  {/* Tooltip muestra fechas y mes */}
+                  <span className={styles.barTooltip}>{item.tooltip}</span>
                 </div>
-                <span className={styles.weekLabel}>{item.week}</span>
-                </div>
+                <span className={styles.weekLabel}>{item.label}</span>
+              </div>
             ))}
           </div>
-          <p className="text-xs text-center text-gray-400 mt-4">
-            Comentarios recibidos por semana
+
+          {/* Comentario del footer */}
+          <p className={styles.chartFooterText}>
+            Comentarios recibidos durante las últimas 4 semanas
           </p>
         </div>
 
@@ -181,11 +240,9 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({ comments = [] })
         <div className={`${styles.chartSection} ${styles.fullWidthChart}`}>
             <h4 className={styles.chartTitle}>Resultados: Pregunta de la Semana</h4>
             
-            {loadingPoll && <p className="text-sm text-gray-400 text-center py-4">Cargando...</p>}
-            
-            {!loadingPoll && !poll && <p className="text-sm text-gray-400 text-center py-4">No hay datos disponibles</p>}
-
-            {!loadingPoll && poll && (
+            {!poll ? (
+              <p className="text-sm text-gray-400 text-center py-4">No hay encuesta activa</p>
+            ) : (
                 <>
                     <p className={styles.pollQuestion}>{poll.question}</p>
 

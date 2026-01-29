@@ -98,3 +98,16 @@ export interface Post extends PostRow {
 export interface WeeklyPollWithDetails extends PollRow {
   poll_options: PollOptionRow[];
 }
+
+// --- ESTADÍSTICAS DEL DASHBOARD ---
+export interface TopicStat {
+  topic: string;
+  count: number;
+  pct: string;
+}
+
+export interface WeeklyStat {
+  week: string;
+  count: number;
+  height: string;
+}
