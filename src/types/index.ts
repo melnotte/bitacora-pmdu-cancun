@@ -8,6 +8,8 @@ export type PostRow = Database['public']['Tables']['posts']['Row'];
 export type InstrumentRow = Database['public']['Tables']['official_instruments']['Row'];
 export type PollRow = Database['public']['Tables']['weekly_polls']['Row'];
 export type PollOptionRow = Database['public']['Tables']['poll_options']['Row'];
+export type ChapterRow = Database['public']['Tables']['consultation_chapters']['Row'];
+export type CommentRow = Database['public']['Tables']['comments']['Row'];
 
 // --- TIPOS EXTENDIDOS O DE AYUDA ---
 

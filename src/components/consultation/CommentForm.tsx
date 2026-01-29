@@ -1,20 +1,10 @@
-import { useState } from 'react';
-import { FaCheckCircle, FaCloudUploadAlt } from 'react-icons/fa';
+import { useState, useEffect } from 'react';
+import { FaCheckCircle, FaCloudUploadAlt, FaExclamationCircle } from 'react-icons/fa';
 import styles from './CommentForm.module.css';
-import type { Comment } from '../../data/commentsData';
-
-const THEMES = [
-  "Diagnóstico Integrado",
-  "Estrategia de Movilidad",
-  "Zonificación Secundaria",
-  "Espacio Público y Equipamiento",
-  "Medio Ambiente y Sostenibilidad",
-  "Infraestructura y Servicios",
-  "Otro"
-];
+import { supabase } from '../../lib/supabase';
+import type { ChapterRow } from '../../types';
 
 const CommentForm = () => {
-  // Estados del formulario
   const [formData, setFormData] = useState({
     topic: '',
     comment: '',
@@ -23,9 +13,33 @@ const CommentForm = () => {
     privacy: false
   });
   
+  const [chapters, setChapters] = useState<ChapterRow[]>([]);
+  const [isLoadingChapters, setIsLoadingChapters] = useState(true);
   const [file, setFile] = useState<File | null>(null);
-  const [status, setStatus] = useState<'idle' | 'submitting' | 'success'>('idle');
+  const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+  const [errorMessage, setErrorMessage] = useState('');
   const [folio, setFolio] = useState('');
+
+  // Cargar temas
+  useEffect(() => {
+    const fetchChapters = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('consultation_chapters')
+          .select('*')
+          .order('order_index', { ascending: true });
+
+        if (error) throw error;
+        setChapters(data || []);
+      } catch (error) {
+        console.error('Error al cargar temas:', error);
+      } finally {
+        setIsLoadingChapters(false);
+      }
+    };
+
+    fetchChapters();
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -39,49 +53,105 @@ const CommentForm = () => {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
+      const selectedFile = e.target.files[0];
+      
+      // Validación tamaño máximo 5MB
+      if (selectedFile.size > 5 * 1024 * 1024) {
+        alert("El archivo es demasiado pesado. El límite es 5MB.");
+        return;
+      }
+      
+      // Validación tipos permitidos 
+      const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
+      if (!allowedTypes.includes(selectedFile.type)) {
+        alert("Formato no válido. Solo se aceptan PDF, JPG o PNG.");
+        return;
+      }
+
+      setFile(selectedFile);
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Función para subir evidencia al Bucket
+  const uploadEvidence = async (fileToUpload: File): Promise<string | null> => {
+    try {
+      const fileExt = fileToUpload.name.split('.').pop();
+      const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+      const filePath = `public_uploads/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('evidences')
+        .upload(filePath, fileToUpload);
+
+      if (uploadError) throw uploadError;
+
+      // Obtener URL pública
+      const { data } = supabase.storage
+        .from('evidences')
+        .getPublicUrl(filePath);
+
+      return data.publicUrl;
+    } catch (error) {
+      console.error("Error subiendo archivo:", error);
+      throw new Error("No se pudo subir el archivo adjunto.");
+    }
+  };
+
+  // Regex para email
+  const isValidEmail = (email: string) => {
+    if (!email) return true; // Es opcional
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!formData.privacy) {
+      alert("Debes aceptar el Aviso de Privacidad.");
+      return;
+    }
+    if (!isValidEmail(formData.email)) {
+      alert("El formato del correo electrónico no es válido.");
+      return;
+    }
+
     setStatus('submitting');
+    setErrorMessage('');
 
-    // 1. Simulación de retardo de red
-    setTimeout(() => {
-      // 2. Generar datos del sistema (Folio, ID, Fecha)
-      const year = new Date().getFullYear();
-      const randomId = Math.floor(1000 + Math.random() * 9000);
-      const newFolio = `PMDU-${year}-${randomId}`;
-      const today = new Date().toISOString().split('T')[0]; // Formato YYYY-MM-DD
+    try {
+      let evidenceUrl = null;
 
-      // 3. Crear el objeto con la estructura
-      const newComment: Comment = {
-        id: crypto.randomUUID(),
-        folio: newFolio,
-        date: today,
-        topic: formData.topic,
-        zone: formData.zone || 'No especificada',
-        content: formData.comment,
-        status: 'Recibido',
-        internalNote: ''
-      };
-
-      // 4. Guardar en localStorage para simular persistencia en la demo
-      try {
-        const existingData = localStorage.getItem('pmdu_demo_comments');
-        const comments = existingData ? JSON.parse(existingData) : [];
-        localStorage.setItem('pmdu_demo_comments', JSON.stringify([newComment, ...comments]));
-      } catch (error) {
-        console.error("Error guardando en localstorage", error);
+      if (file) {
+        evidenceUrl = await uploadEvidence(file);
       }
 
-      console.log("✅ Comentario registrado en sistema:", newComment);
-      if (file) console.log("📎 Archivo adjunto:", file.name);
+      // Insertamos sin enviar el folio y recuperamos el registro con el folio generado de la db
+      const { data, error } = await supabase
+        .from('comments')
+        .insert([
+          {
+            topic: formData.topic,
+            content: formData.comment,
+            zone: formData.zone,
+            email: formData.email || null,
+            evidence_url: evidenceUrl,
+            has_accepted_privacy: formData.privacy,
+            status: 'pending'
+          }
+        ])
+        .select()
+        .single();
 
-      setFolio(newFolio);
+      if (error) throw error;
+
+      setFolio(data.folio || '');
       setStatus('success');
-    }, 1500);
+
+    } catch (error: any) {
+      console.error('Error al enviar:', error);
+      setStatus('error');
+      setErrorMessage(error.message || 'Ocurrió un error al enviar tu comentario.');
+    }
   };
 
   const handleReset = () => {
@@ -89,21 +159,22 @@ const CommentForm = () => {
     setFile(null);
     setStatus('idle');
     setFolio('');
+    setErrorMessage('');
   };
 
   if (status === 'success') {
     return (
       <div className={styles.container}>
         <div className={styles.successState}>
-          <FaCheckCircle color="#2e7d32" size={60} style={{ marginBottom: '20px' }} />
+          <FaCheckCircle className={styles.successIcon} />
           <h2 className={styles.title}>¡Comentario Enviado!</h2>
           <p className={styles.subtitle}>
             Tu aportación ha sido registrada correctamente en el sistema de consulta pública.
           </p>
 
-          <div style={{ background: '#f5f5f5', padding: '15px', borderRadius: '8px', margin: '20px 0', border: '1px dashed #ccc' }}>
-            <span style={{ display: 'block', fontSize: '0.85rem', color: '#666', marginBottom: '5px' }}>Tu folio de seguimiento</span>
-            <span style={{ fontSize: '1.5rem', fontWeight: '800', color: '#005eb8', letterSpacing: '1px' }}>{folio}</span>
+          <div className={styles.folioBox}>
+            <span className={styles.folioLabel}>Tu folio de seguimiento es:</span>
+            <span className={styles.folioValue}>{folio}</span>
           </div>
 
           <p style={{ color: '#666', marginBottom: '30px', fontSize: '0.9rem' }}>
@@ -112,8 +183,11 @@ const CommentForm = () => {
               : "Por favor guarda este folio para consultar el estatus de tu aportación en la sección de Transparencia."}
           </p>
 
-          <button onClick={handleReset} className={styles.submitButton} style={{ marginTop: 0 }}>
-            Enviar otro comentario
+          <button 
+            className={styles.resetButton}
+            onClick={handleReset}
+          >
+            Enviar otra propuesta
           </button>
         </div>
       </div>
@@ -125,9 +199,16 @@ const CommentForm = () => {
       <div className={styles.header}>
         <h2 className={styles.title}>Buzón de Consulta Pública</h2>
         <p className={styles.subtitle}>
-          Envía tus observaciones, propuestas o comentarios técnicos sobre el borrador del PMDU.
+          Envía tus observaciones, propuestas o comentarios técnicos para la construcción del PMDU.
         </p>
       </div>
+
+      {status === 'error' && (
+        <div className={styles.errorBox}>
+          <FaExclamationCircle />
+          <span>{errorMessage}</span>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className={styles.form}>
         
@@ -141,11 +222,13 @@ const CommentForm = () => {
                 value={formData.topic} 
                 onChange={handleChange} 
                 className={styles.select}
-                style={{ width: '100%', padding: '12px', borderRadius: '6px', border: '1px solid #ccc' }}
                 required
+                disabled={isLoadingChapters}
               >
                 <option value="">Selecciona un tema...</option>
-                {THEMES.map(t => <option key={t} value={t}>{t}</option>)}
+                {chapters.map((chapter) => (
+                  <option key={chapter.id} value={chapter.name}>{chapter.name}</option>
+                ))}
               </select>
             </div>
           </div>
@@ -172,9 +255,10 @@ const CommentForm = () => {
             name="comment" 
             value={formData.comment} 
             onChange={handleChange} 
+            rows={6}
+            maxLength={3000}
             placeholder="Describe tu observación de manera clara..."
             className={styles.textarea}
-            style={{ minHeight: '120px', width: '100%', padding: '12px', borderRadius: '6px', border: '1px solid #ccc', resize: 'vertical' }}
             required
           />
         </div>
@@ -182,37 +266,30 @@ const CommentForm = () => {
         {/* Archivo Adjunto */}
         <div className={styles.formGroup}>
           <label className={styles.label}>Adjuntar Documento o Evidencia (Opcional)</label>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '5px' }}>
-            <label style={{ 
-              cursor: 'pointer', 
-              padding: '8px 16px', 
-              border: '1px solid #ddd', 
-              borderRadius: '6px', 
-              background: '#f9f9f9', 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: '8px',
-              fontSize: '0.9rem'
-            }}>
+          
+          <div className={styles.fileInputContainer}>
+            <label className={styles.fileLabelBtn}>
               <FaCloudUploadAlt color="#666" />
               Elegir archivo
               <input 
                 type="file" 
                 onChange={handleFileChange} 
                 style={{ display: 'none' }}
-                accept=".pdf,.doc,.docx,.jpg,.png"
+                accept=".pdf,.jpeg,.jpg,.png"
               />
             </label>
+
             {file ? (
-              <span style={{ fontSize: '0.85rem', color: '#2e7d32', fontWeight: 600 }}>
+              <span className={styles.fileName}>
                 {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
               </span>
             ) : (
               <span style={{ fontSize: '0.85rem', color: '#999' }}>Ningún archivo seleccionado</span>
             )}
           </div>
-          <small style={{ color: '#9ca3af', display: 'block', marginTop: '5px', fontSize: '0.8rem' }}>
-            Formatos aceptados: PDF, Word, Imagen. Tamaño máx: 5MB.
+
+          <small className={styles.fileHelp}>
+            Formatos aceptados: PDF, JPG o PNG. Tamaño máx: 5MB.
           </small>
         </div>
 
@@ -230,7 +307,7 @@ const CommentForm = () => {
         </div>
 
         {/* Aviso de Privacidad */}
-        <div className={styles.checkboxGroup} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', marginTop: '10px' }}>
+        <div className={styles.checkboxGroup}>
           <input 
             type="checkbox" 
             name="privacy" 
@@ -238,10 +315,9 @@ const CommentForm = () => {
             checked={formData.privacy} 
             onChange={handleChange} 
             className={styles.checkbox}
-            style={{ marginTop: '4px' }}
-            required 
+            required
           />
-          <label htmlFor="privacy" className={styles.checkboxLabel} style={{ fontSize: '0.9rem', color: '#555', lineHeight: '1.4' }}>
+          <label htmlFor="privacy" className={styles.checkboxLabel}>
             He leído y acepto el <strong>Aviso de Privacidad</strong>. Mis datos personales (si los proporciono) 
             serán utilizados únicamente para el registro y análisis estadístico de la consulta pública.
           </label>

@@ -173,9 +173,8 @@
 }
 
 /* --- Estilos para la gráfica de resultados de la Encuesta Semanal --- */
-
 .pollQuestion {
-  font-size: 0.875rem;
+  font-size: 1.5rem;
   color: #6b7280;
   margin-bottom: 1rem;
   font-style: italic;
@@ -226,7 +225,7 @@
 }
 
 .pollTotal {
-  font-size: 0.75rem;
+  font-size: 1rem;
   text-align: center;
   color: #9ca3af;
   margin-top: 1rem;
