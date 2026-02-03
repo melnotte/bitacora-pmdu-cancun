@@ -35,7 +35,7 @@ const Home = () => {
             <span className={`${styles.changingLetter} ${isVisible ? styles.fadeIn : styles.fadeOut}`}>
               {suffix}
             </span> 
-            {' '} a la Bitácora del PMDU de Cancún. Este es el canal oficial para que 
+            {' '} a la Bitácora del PMDU de Benito Juárez. Este es el canal oficial para que 
             conozcas el proyecto y colabores directamente en la construcción de nuestra ciudad.
           </p>
         </div>

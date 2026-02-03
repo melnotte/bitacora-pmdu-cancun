@@ -11,6 +11,8 @@ export type PollOptionRow = Database['public']['Tables']['poll_options']['Row'];
 export type ChapterRow = Database['public']['Tables']['consultation_chapters']['Row'];
 export type CommentRow = Database['public']['Tables']['comments']['Row'];
 export type CommentStatus = 'received' | 'pending' | 'analyzing' | 'integrated' | 'rejected' | 'not_applicable' | 'duplicate';
+export type MapLayerRow = Database['public']['Tables']['map_layers']['Row'];
+export type MapCategoryRow = Database['public']['Tables']['map_categories']['Row'];
 
 // --- TIPOS EXTENDIDOS O DE AYUDA ---
 
@@ -115,4 +117,26 @@ export interface WeeklyStat {
   isCurrentMonth?: boolean;
 }
 
+// --- TIPOS PARA MAPAS ---
+export interface MapLayerMetadata {
+  uniqueIdField: string;
+  highlightColor: string;
+  paint: any;
+  visibleFields?: string[];
+  legend?: Array<{ color: string; label: string }>;
+}
+
+export interface MapLayer extends Omit<MapLayerRow, 'metadata'> {
+  metadata: MapLayerMetadata;
+  layer_type: 'fill' | 'line' | 'circle';
+  data?: any;
+  uniqueIdField?: string; 
+  highlightColor?: string;
+  paint?: any;
+  legend?: Array<{ color: string; label: string }>;
+}
+
+export interface MapCategoryWithLayers extends MapCategoryRow {
+  layers: MapLayer[];
+}
 

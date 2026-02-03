@@ -1,16 +1,23 @@
 .container {
   position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 100dvh; 
+  width: 100%;
   display: flex;
   background: #e5e7eb;
   overflow: hidden;
+  overscroll-behavior: none; 
 }
 
 .mapContainer {
   position: absolute;
   top: 0; left: 0; width: 100%; height: 100%;
   touch-action: none;
-  outline: none; 
+  outline: none;
+  z-index: 1;
 }
 
 /* SIDEBAR */
@@ -444,6 +451,12 @@
   position: relative;
 }
 
+.fullTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 0;
+}
+
 .fullTable th {
   top: 0;
   z-index: 10;
@@ -463,6 +476,10 @@
   white-space: nowrap;
 }
 
+.fullTable tbody tr:hover {
+  background-color: #f8fafc;
+}
+
 /* MEDIA QUERIES PARA MÓVIL */
 @media (max-width: 768px) {
   .sidebar {
@@ -474,8 +491,13 @@
     left: 0 !important;
   }
   .bottomPanel {
-    height: 30vh;
+    height: 35dvh; 
     z-index: 30;
+    width: 100% !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    position: absolute;
+    margin: 0;
   }
   .panelHeader {
     padding: 10px;
@@ -510,4 +532,23 @@
     top: 70px;
     box-shadow: 2px 2px 5px rgba(0,0,0,0.2); 
   }
+  .tableContainer {
+    flex: 1;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    height: 100%; 
+  }
 }
+
+.spinnerIcon {
+  margin-left: 8px;
+  color: #3b82f6;
+  animation: spin 1s linear infinite;
+  font-size: 14px;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
