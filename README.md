@@ -16,7 +16,7 @@ El cliente web está construido con las últimas versiones del ecosistema React:
 * **Iconos:** React Icons
 
 ### Backend & Infraestructura (Próximamente)
-La gestión de contenidos y datos será **Self-Hosted** para garantizar la soberanía de la información:
+La gestión de contenidos y datos es soportada por:
 * **BaaS / CMS:** [Supabase](https://supabase.com/) (Open Source)
 * **Base de Datos:** PostgreSQL + PostGIS (para datos geográficos)
 * **Despliegue Backend:** Docker & Docker Compose (On-Premise)
@@ -57,19 +57,25 @@ Para ejecutar este proyecto localmente necesitas:
     ```
 
 3.  **Configurar Variables de Entorno:**
-    Crea un archivo `.env` en la raíz del proyecto basado en el siguiente ejemplo:
+    Crea un archivo .env basado en el ejemplo para conectar tu cliente de Supabase y Mapbox:
 
-    ```env
-    # .env
-    # Token necesario para renderizar los mapas
-    VITE_MAPBOX_TOKEN=pk.tu_token_publico_de_mapbox_aqui
-    
-    # URL de conexión al Backend (Supabase Local por defecto)
-    VITE_SUPABASE_URL=[http://127.0.0.1:54321](http://127.0.0.1:54321)
-    VITE_SUPABASE_ANON_KEY=tu_clave_anonima_local
+    ```bash
+    cp .env.example .env
     ```
 
-4.  **Levantar el Servidor de Desarrollo:**
+    Configura las siguientes llaves con tus credenciales de proyecto: 
+
+    * **VITE_SUPABASE_URL:** URL de tu proyecto en Supabase. 
+    * **VITE_SUPABASE_ANON_KEY:** Tu llave pública anónima. 
+    * **VITE_MAPBOX_TOKEN:** Tu token de Mapbox para los mapas.
+
+4. **Configurar Base de Datos y Almacenamiento:**
+
+    Este proyecto requiere que tu instancia de Supabase tenga el esquema de tablas y datos iniciales. Los archivos necesarios se encuentran en la carpeta /supabase. 
+ 
+    Sigue los pasos detallados aquí: 👉 [Guía detallada de configuración de Supabase](./supabase/README.md)
+
+5.  **Levantar el Servidor de Desarrollo:**
     ```bash
     npm run dev
     ```
@@ -79,33 +85,29 @@ Para ejecutar este proyecto localmente necesitas:
 
 ## 🐳 Levantar Backend Local
 
-Para desarrollar funcionalidades que requieran base de datos (Login, Guardar comentarios, CMS), utilizaremos Docker.
-
-1.  Asegúrate de tener Docker corriendo.
-2.  Inicializa los servicios:
-    ```bash
+Si utilizas el CLI de Supabase para desarrollo local: 
+1. Asegúrate de tener Docker corriendo. 
+2. Inicializa los servicios: 
+    ```bash 
     npx supabase start
     ```
-3.  Al finalizar, obtendrás las credenciales `API URL` y `anon key` que debes colocar en tu archivo `.env`.
+3. Al finalizar, obtendrás las credenciales `API URL` y `anon key` que debes colocar en tu archivo `.env`.
+4. El sistema aplicará automáticamente las migraciones y el seed de datos. 
 
----
-
+--- 
 ## 📂 Estructura del Proyecto
 
-```text
-src/
-├── assets/          # Imágenes y recursos estáticos
-├── components/      # Componentes reutilizables (Botones, Cards, etc.)
-│   ├── layout/      # Navbar, Footer, Layout principal
-│   ├── home/        # Componentes específicos del Home
-│   └── ...
-├── data/            # Datos estáticos (JSONs provisionales)
-├── lib/             # Configuración de clientes (Supabase, Utils)
-├── pages/           # Vistas principales (Rutas)
-│   ├── Maps.tsx     # Visor de Mapbox
-│   └── ...
-├── App.tsx          # Configuración de Rutas (React Router)
-└── main.tsx         # Punto de entrada
+```text 
+src/ 
+├── components/ # Componentes de UI (layout, home, maps, etc.) 
+├── hooks/ # Lógica de mapas e interacciones 
+├── lib/ # Cliente de Supabase inicializado 
+├── pages/ # Vistas principales (Home, Maps, Consultation, etc.) 
+└── types/ # Tipos de TypeScript y Esquema de Supabase 
+supabase/ 
+├── migrations/ # Esquema SQL remoto para clonar las tablas 
+├── seed.sql # Datos de prueba (Encuestas, comentarios, etc.) 
+└── README.md # Guía paso a paso para desplegar en tu servidor Supabase 
 ```
 
 ## 📦 Scripts Disponibles
