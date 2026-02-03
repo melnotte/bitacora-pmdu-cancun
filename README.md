@@ -15,7 +15,7 @@ El cliente web está construido con las últimas versiones del ecosistema React:
 * **Estilos:** CSS Modules (Estilos encapsulados por componente) + CSS nativo
 * **Iconos:** React Icons
 
-### Backend & Infraestructura (Próximamente)
+### Backend & Infraestructura
 La gestión de contenidos y datos es soportada por:
 * **BaaS / CMS:** [Supabase](https://supabase.com/) (Open Source)
 * **Base de Datos:** PostgreSQL + PostGIS (para datos geográficos)
@@ -71,8 +71,8 @@ Para ejecutar este proyecto localmente necesitas:
 
 4. **Configurar Base de Datos y Almacenamiento:**
 
-    Este proyecto requiere que tu instancia de Supabase tenga el esquema de tablas y datos iniciales. Los archivos necesarios se encuentran en la carpeta /supabase. 
- 
+    Este proyecto requiere que tu instancia de Supabase tenga el esquema de tablas, datos iniciales y buckets de storage creados.  Los archivos necesarios se encuentran en la carpeta /supabase. 
+    
     Sigue los pasos detallados aquí: 👉 [Guía detallada de configuración de Supabase](./supabase/README.md)
 
 5.  **Levantar el Servidor de Desarrollo:**
